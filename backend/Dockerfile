@@ -1,8 +1,8 @@
 # ============================================================
 # SunsetBot Backend — Dockerfile
 # ============================================================
-# Image will be ~2-3 GB due to PyTorch + SentenceTransformers.
-# First startup downloads the embedding model (~90 MB).
+# Uses PyTorch CPU-only to keep image under Railway's 4 GB limit.
+# Full CUDA PyTorch is ~2.5 GB; CPU-only is ~200 MB.
 # ============================================================
 # NOTE: Build context is the repo root (set by railway.toml),
 # so all COPY paths are relative to the repo root.
@@ -17,7 +17,11 @@ RUN apt-get update && \
 
 WORKDIR /app
 
-# Install Python dependencies first (cached layer)
+# Install PyTorch CPU-only FIRST (before requirements.txt)
+# This avoids pulling in the ~2.5 GB CUDA version
+RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
+
+# Install remaining Python dependencies
 COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
