@@ -1,16 +1,16 @@
 client_id = "b323444b85e59301f81c74e556dd7efe"
 name = "SunsetBot"
 handle = "sunsetbot"
-application_url = "https://subexternal-undelighted-sherron.ngrok-free.dev"
+application_url = "https://sunsetbot-production.up.railway.app"
 embedded = false
 
 [access_scopes]
-scopes = "read_products,read_orders,read_customers"
+scopes = "read_products,write_products,read_orders,read_customers"
 use_legacy_install_flow = true
 
 [auth]
 redirect_urls = [
-  "https://subexternal-undelighted-sherron.ngrok-free.dev/shopify/callback"
+  "https://sunsetbot-production.up.railway.app/shopify/callback"
 ]
 
 [webhooks]
@@ -20,4 +20,4 @@ api_version = "2024-10"
 
 [[webhooks.subscriptions]]
 topics = ["products/create", "products/update", "products/delete", "app/uninstalled"]
-uri = "https://subexternal-undelighted-sherron.ngrok-free.dev/shopify/webhooks"
+uri = "https://sunsetbot-production.up.railway.app/shopify/webhooks"
