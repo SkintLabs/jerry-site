@@ -5,7 +5,7 @@
 SunsetBot is an AI-powered customer service chatbot for Shopify stores. Store owners install it via Shopify OAuth, their product catalog syncs automatically, and customers get an intelligent shopping assistant via an embeddable chat widget.
 
 **Target market:** Shopify store owners. Planned pricing: $199/mo.
-**Current status:** Shopify OAuth tested and working. App installed on dev store `sunsetbot.myshopify.com`.
+**Current status:** Deployed to Railway. Live at `https://sunsetbot-production.up.railway.app`. 12 test products synced, chat working with real Shopify data.
 
 ## Tech Stack
 
@@ -27,9 +27,15 @@ sunsetbot/
 ├── CLAUDE.md                            # THIS FILE
 ├── SESSION_4_HANDOFF.md                 # Project history through Session 4
 ├── SESSION_5_HANDOFF.md                 # Session 5 handoff (Shopify integration)
+├── SESSION_6_HANDOFF.md                 # Session 6 handoff (deployment)
 ├── shopify.app.toml                     # Shopify app config (used by Shopify CLI)
+├── railway.toml                         # Railway deployment config
+├── package.json                         # Root package.json (for Shopify CLI)
+├── .gitignore                           # Git ignore rules
 ├── backend/
 │   ├── main.py                          # FastAPI app, WebSocket, REST endpoints (v3.0.0)
+│   ├── Dockerfile                       # Docker build (PyTorch CPU-only for Railway)
+│   ├── .dockerignore                    # Docker ignore rules
 │   ├── requirements.txt                 # Python dependencies
 │   ├── test_chat.html                   # Browser-based chat test UI (legacy)
 │   ├── .env                             # API keys (NEVER commit)
@@ -248,30 +254,41 @@ GET  /static/demo.html                  Widget demo page
 - **App Client ID:** `b323444b85e59301f81c74e556dd7efe` (also in .env as SHOPIFY_API_KEY)
 - **Distribution:** Custom distribution (install link generated via Partner dashboard)
 - **App installed on dev store:** YES (Feb 22, 2026)
-- **Legacy install flow:** Enabled
+- **Legacy install flow:** Disabled (incompatible with declarative webhooks)
 - **Railway account:** Created, linked to GitHub
+- **Railway domain:** `sunsetbot-production.up.railway.app`
+- **Railway services:** sunsetbot (app) + PostgreSQL
+- **GitHub repo:** `Buddafest/sunsetbot` (private)
 
 ## What Needs Building Next (Prioritized)
 
-1. **Add test products to dev store** — The dev store has 0 products. Add some test products in Shopify admin, then trigger a product sync to test the full pipeline end-to-end.
-2. **Railway deployment** — Dockerfile, railway.toml, production env vars. Push to GitHub, connect to Railway.
-3. **Redis session persistence** — Replace `_InMemoryContextManager`. `to_json()`/`from_json()` already work.
-4. **Store-specific StoreConfig** — Load store name/policies from DB into ConversationEngine (currently uses hardcoded defaults).
-5. **Billing / Shopify App Store** — Usage metering, Shopify billing API integration.
-6. **Store owner dashboard** — Analytics, conversation viewer, escalation alerts.
-7. **Automated tests** — No pytest tests exist yet. Smoke tests in `if __name__ == "__main__"` blocks.
+1. **Shopify CLI deploy** — Run `shopify app deploy` to push updated URLs (Railway) to Shopify Partners. Needed before any new store installs.
+2. **Redis session persistence** — Replace `_InMemoryContextManager`. `to_json()`/`from_json()` already work.
+3. **Store-specific StoreConfig** — Load store name/policies from DB into ConversationEngine (currently uses hardcoded defaults).
+4. **Billing / Shopify App Store** — Usage metering, Shopify billing API integration.
+5. **Store owner dashboard** — Analytics, conversation viewer, escalation alerts.
+6. **Automated tests** — No pytest tests exist yet. Smoke tests in `if __name__ == "__main__"` blocks.
 
 ## Common Commands
 
 ```bash
-# Start backend server
+# Start backend server (local dev)
 cd ~/sunsetbot/backend && source venv/bin/activate && python main.py
 
-# Health check
+# Health check (local)
 curl http://localhost:8000/health
+
+# Health check (production)
+curl https://sunsetbot-production.up.railway.app/health
+
+# Demo page (production)
+open https://sunsetbot-production.up.railway.app/static/demo.html
 
 # List installed stores
 curl http://localhost:8000/shopify/stores
+
+# Resync products for a store
+curl -X POST "http://localhost:8000/shopify/resync?shop=sunsetbot.myshopify.com"
 
 # Start ngrok for Shopify OAuth testing
 ngrok http 8000
@@ -279,14 +296,14 @@ ngrok http 8000
 # Build widget (from frontend dir)
 cd ~/sunsetbot/frontend && npm run build
 
+# Deploy to Shopify (push app config)
+cd ~/sunsetbot && npx @shopify/cli@latest app deploy
+
+# Git push (triggers Railway auto-deploy)
+cd ~/sunsetbot && git push origin main
+
 # View widget demo
 open http://localhost:8000/static/demo.html
-
-# Smoke test conversation engine
-cd ~/sunsetbot/backend && python app/services/conversation_engine.py
-
-# Smoke test product intelligence
-cd ~/sunsetbot/backend && python app/services/product_intelligence.py
 ```
 
 ## Session History
@@ -296,5 +313,7 @@ cd ~/sunsetbot/backend && python app/services/product_intelligence.py
 - **Session 3 (Feb ~18):** product_intelligence.py + main.py + test_chat.html
 - **Session 4 (Feb 21):** Comprehensive audit — 8 bugs fixed, security hardening, performance optimization, category groups, follow-up detection
 - **Session 5 (Feb 22):** Shopify integration (OAuth, product sync, webhooks), JWT auth, database layer, React chat widget, centralized settings. **OAuth tested and working — app installed on dev store.**
+- **Session 5.5 (Feb 23):** Code review fixes — WS race condition (asyncio.Lock), JWT secret validation, input sanitization (NFKC), Groq rate-limit retry (specific RateLimitError), hardcoded URL fix.
+- **Session 6 (Feb 23):** 12 test products created via Shopify API, product sync pipeline verified end-to-end, Railway deployment (Dockerfile with CPU-only PyTorch, PostgreSQL), Shopify app URLs updated to Railway domain. **App is now live at `https://sunsetbot-production.up.railway.app`.**
 
-Full details in `SESSION_5_HANDOFF.md`.
+Full details in `SESSION_6_HANDOFF.md`.
