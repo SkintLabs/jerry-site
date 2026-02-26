@@ -509,7 +509,7 @@ class EscalationHandler:
     """Analyzes conversations for signals that warrant human intervention."""
 
     HIGH_PRIORITY_KEYWORDS = [
-        "refund", "manager", "supervisor", "complaint", "terrible", "awful",
+        "manager", "supervisor", "complaint", "terrible", "awful",
         "disgusting", "worst ever", "never again", "lawyer", "sue", "legal action",
         "chargeback", "fraud", "scam", "report you",
     ]
