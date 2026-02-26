@@ -958,7 +958,16 @@ class ConversationEngine:
         )
 
         # Step 5: Escalation Check
-        escalation = self.escalation_handler.check(message, response_text, context)
+        # Skip escalation when customer hasn't provided order details yet —
+        # let Jerry gather info first before involving a human
+        skip_escalation = (
+            intent in ("support", "order_tracking")
+            and "order_number" not in entities
+        )
+        if skip_escalation:
+            escalation = None
+        else:
+            escalation = self.escalation_handler.check(message, response_text, context)
         escalated = escalation is not None
         escalation_reason = escalation.reason if escalation else None
 
