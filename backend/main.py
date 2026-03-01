@@ -163,13 +163,28 @@ async def lifespan(app: FastAPI):
         logger.error(f"AnalyticsService failed: {e}", exc_info=True)
         analytics_service = None
 
-    # --- STARTUP: Initialize Firewall ---
+    # --- STARTUP: Initialize Firewall (WonderwallAi SDK) ---
     try:
-        from app.firewall.engine import FirewallEngine
+        from wonderwallai import Wonderwall
+        from wonderwallai.patterns.topics import ECOMMERCE_TOPICS
         embedding_model = product_intelligence.embedding_model if product_intelligence else None
-        firewall_engine = FirewallEngine(embedding_model=embedding_model)
+        firewall_engine = Wonderwall(
+            topics=ECOMMERCE_TOPICS,
+            embedding_model=embedding_model,
+            sentinel_api_key=settings.groq_api_key if hasattr(settings, 'groq_api_key') else "",
+            bot_description="a customer service chatbot that helps with shopping",
+            canary_prefix="JERRY-CANARY-",
+            block_message=(
+                "I'm Jerry, your shopping assistant! I can help with products, "
+                "orders, shipping, and returns. What can I help you with?"
+            ),
+            block_message_injection=(
+                "I'm here to help with shopping! Could you rephrase your "
+                "question about our products or orders?"
+            ),
+        )
     except Exception as e:
-        logger.error(f"FirewallEngine failed: {e}", exc_info=True)
+        logger.error(f"Wonderwall firewall failed: {e}", exc_info=True)
         firewall_engine = None
 
     # Log integration status
@@ -329,9 +344,10 @@ async def websocket_chat(
     # --- Load or create context ---
     context = await conversation_engine.get_or_create_context(session_id, store_id)
 
-    # Inject canary token for egress filter
+    # Inject canary token for egress filter (WonderwallAi SDK)
     if firewall_engine and not getattr(context, 'canary_token', None):
-        context.canary_token = firewall_engine.generate_canary_token(session_id)
+        context.canary_token = firewall_engine.generate_canary(session_id)
+        context.canary_prompt_block = firewall_engine.get_canary_prompt(context.canary_token)
 
     # --- Send welcome message ---
     welcome = _build_welcome_message(store_id, session_id)
