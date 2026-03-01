@@ -78,10 +78,45 @@ async_session_factory = async_sessionmaker(
 # ---------------------------------------------------------------------------
 
 async def init_db() -> None:
-    """Create all tables if they don't exist. Call once at startup."""
+    """Create all tables if they don't exist, then run lightweight migrations."""
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+
+    # --- Lightweight column migrations (SQLAlchemy create_all won't ALTER) ---
+    await _migrate_add_missing_columns()
+
     logger.info(f"Database initialized (url={DATABASE_URL.split('://')[0]})")
+
+
+async def _migrate_add_missing_columns() -> None:
+    """
+    Add columns introduced after initial table creation.
+    Safe to run repeatedly — skips columns that already exist.
+    """
+    migrations = [
+        ("stores", "stripe_customer_id", "VARCHAR(255)"),
+        ("stores", "stripe_subscription_id", "VARCHAR(255)"),
+        ("stores", "jerry_plan", "VARCHAR(32) DEFAULT 'base'"),
+        ("stores", "monthly_interaction_limit", "INTEGER DEFAULT 500"),
+        ("stores", "current_month_usage", "INTEGER DEFAULT 0"),
+        ("stores", "billing_cycle_reset", "DATETIME"),
+    ]
+
+    from sqlalchemy import text
+
+    async with engine.begin() as conn:
+        for table, column, col_type in migrations:
+            try:
+                await conn.execute(
+                    text(f"ALTER TABLE {table} ADD COLUMN {column} {col_type}")
+                )
+                logger.info(f"Migration: added {table}.{column}")
+            except Exception as e:
+                # Column already exists — this is fine
+                if "duplicate column" in str(e).lower() or "already exists" in str(e).lower():
+                    pass
+                else:
+                    logger.warning(f"Migration skip {table}.{column}: {e}")
 
 
 async def close_db() -> None:
