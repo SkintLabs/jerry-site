@@ -46,4 +46,4 @@ ShopifyAPI>=12.6.0,<14.0
 stripe>=8.0.0,<10.0
 
 # AI Firewall (WonderwallAi SDK)
-wonderwallai[all]>=0.1.0
+wonderwallai[all] @ git+https://github.com/Buddafest/wonderwallai.git
