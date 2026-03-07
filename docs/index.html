@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jerry — AI Customer Service That Never Sleeps</title>
+    <meta name="description" content="AI-powered customer service for Shopify stores. Jerry handles product questions, order tracking, returns, and more — 24/7, in any language. Powered by advanced AI with enterprise-grade security.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* ── Jerry Brand: Golden Hour colors + Sunset Boulevard typography ── */
+        :root {
+            /* Golden Hour Palette */
+            --mustard: #f4a900;
+            --terracotta: #c1666b;
+            --warm-beige: #d4b896;
+            --chocolate: #4a4032;
+
+            /* Sunset Boulevard Accent Colors */
+            --burnt-orange: #e76f51;
+            --coral: #f4a261;
+            --warm-sand: #e9c46a;
+            --deep-teal: #264653;
+
+            /* Functional Colors */
+            --bg: #0a0a0f;
+            --bg-subtle: #0f0f16;
+            --bg-card: #13131a;
+            --bg-card-hover: #1a1a24;
+            --border: #1f1f2a;
+            --border-hover: #2e2e3a;
+            --text: #ede8e0;
+            --text-secondary: #b5a99a;
+            --text-muted: #7a7068;
+
+            /* Primary = Mustard Yellow */
+            --primary: #f4a900;
+            --primary-hover: #ffbd2e;
+            --primary-glow: rgba(244, 169, 0, 0.12);
+
+            /* Accent = Terracotta */
+            --accent: #c1666b;
+            --accent-hover: #d47a7f;
+
+            /* Gradients */
+            --gradient-warm: linear-gradient(135deg, #f4a900 0%, #c1666b 50%, #e76f51 100%);
+            --gradient-text: linear-gradient(135deg, #f4a900 0%, #e9c46a 40%, #f4a261 70%, #c1666b 100%);
+            --gradient-sunset: linear-gradient(135deg, #f4a900 0%, #e76f51 100%);
+
+            --code-bg: #0c0c12;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        /* ── Sunset Boulevard serif for headings ── */
+        h1, h2, h3 {
+            font-family: 'Noto Serif', 'DejaVu Serif', Georgia, serif;
+        }
+
+        a { color: var(--primary); text-decoration: none; transition: color 0.2s; }
+        a:hover { color: var(--primary-hover); }
+
+        .container { max-width: 1140px; margin: 0 auto; padding: 0 24px; }
+
+        /* ── Animations ── */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+        /* ── NAV ── */
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+        }
+        nav .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 64px;
+        }
+        .logo {
+            font-family: 'Noto Serif', Georgia, serif;
+            font-size: 1.4rem;
+            font-weight: 900;
+            background: var(--gradient-text);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
+        }
+        .nav-links { display: flex; gap: 32px; align-items: center; }
+        .nav-links a {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .nav-links a:hover { color: var(--text); }
+        .nav-cta {
+            background: var(--gradient-sunset) !important;
+            color: #000 !important;
+            -webkit-text-fill-color: #000 !important;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+        .nav-cta:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        /* ── HERO ── */
+        .hero {
+            padding: 160px 0 100px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 6px 16px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+        }
+        .hero-badge span { color: var(--primary); font-weight: 600; }
+
+        h1 {
+            font-size: clamp(2.8rem, 6vw, 4.5rem);
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+            margin-bottom: 24px;
+        }
+        .gradient-text {
+            background: var(--gradient-text);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero-sub {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 40px;
+            line-height: 1.7;
+        }
+        .hero-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+        .btn-primary {
+            background: var(--gradient-sunset);
+            color: #000;
+            padding: 14px 32px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1rem;
+            border: none;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-2px); color: #000; }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text);
+            padding: 14px 32px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1rem;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-secondary:hover { border-color: var(--primary); color: var(--primary); background: var(--bg-card-hover); }
+
+        /* ── STATS BAR ── */
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 64px;
+            padding: 48px 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            margin: 0 auto;
+            max-width: 800px;
+        }
+        .stat-item { text-align: center; }
+        .stat-value {
+            font-family: 'Noto Serif', Georgia, serif;
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--primary);
+        }
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* ── SECTIONS ── */
+        section { padding: 100px 0; }
+        .section-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        h2 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 900;
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+            margin-bottom: 16px;
+        }
+        .section-desc {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            line-height: 1.7;
+        }
+
+        /* ── PROBLEM SECTION ── */
+        .problem {
+            background: var(--bg-subtle);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+        .problem-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-top: 48px;
+        }
+        .problem-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+        .problem-card:hover { border-color: var(--terracotta); transform: translateY(-2px); }
+        .problem-icon { font-size: 1.6rem; margin-bottom: 12px; }
+        .problem-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+        .problem-card p { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; }
+
+        /* ── FEATURES ── */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+            margin-top: 48px;
+        }
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            transition: border-color 0.3s, transform 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: var(--gradient-sunset);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .feature-card:hover { border-color: var(--border-hover); transform: translateY(-3px); }
+        .feature-card:hover::before { opacity: 1; }
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            margin-bottom: 16px;
+            background: var(--primary-glow);
+        }
+        .feature-card h3 { font-size: 1.15rem; margin-bottom: 8px; }
+        .feature-card p { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; }
+
+        /* ── HOW IT WORKS ── */
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+            margin-top: 48px;
+        }
+        .step {
+            text-align: center;
+            padding: 32px 24px;
+            position: relative;
+        }
+        .step-number {
+            font-family: 'Noto Serif', Georgia, serif;
+            font-size: 3.5rem;
+            font-weight: 900;
+            background: var(--gradient-text);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            margin-bottom: 16px;
+        }
+        .step h3 { font-size: 1.2rem; margin-bottom: 8px; }
+        .step p { font-size: 0.9rem; color: var(--text-secondary); }
+
+        /* ── SECURITY ── */
+        .security {
+            background: var(--bg-subtle);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+        .security-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(193, 102, 107, 0.1);
+            border: 1px solid rgba(193, 102, 107, 0.2);
+            padding: 4px 14px;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            color: var(--terracotta);
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        .security-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-top: 32px;
+        }
+        .security-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+        }
+        .security-check { color: var(--primary); font-size: 1.1rem; flex-shrink: 0; margin-top: 2px; }
+        .security-item strong { display: block; font-size: 0.9rem; margin-bottom: 2px; }
+        .security-item span { font-size: 0.8rem; color: var(--text-muted); }
+
+        /* ── PRICING ── */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 24px;
+            margin-top: 48px;
+            max-width: 780px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .price-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 36px;
+            position: relative;
+            transition: transform 0.2s;
+        }
+        .price-card:hover { transform: translateY(-3px); }
+        .price-card.featured {
+            border-color: var(--primary);
+            box-shadow: 0 0 40px var(--primary-glow);
+        }
+        .price-card.featured::before {
+            content: 'Most Popular';
+            position: absolute;
+            top: -12px; left: 50%;
+            transform: translateX(-50%);
+            background: var(--gradient-sunset);
+            color: #000;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 16px;
+            border-radius: 100px;
+        }
+        .price-name {
+            font-family: 'Noto Serif', Georgia, serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .price-desc { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px; }
+        .price-amount {
+            font-family: 'Noto Serif', Georgia, serif;
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: var(--primary);
+        }
+        .price-amount span { font-size: 1rem; color: var(--text-muted); font-weight: 400; }
+        .price-period { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 24px; }
+        .price-features { list-style: none; margin-bottom: 28px; }
+        .price-features li {
+            padding: 8px 0;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .price-features li:last-child { border-bottom: none; }
+        .price-features .check { color: var(--primary); }
+
+        .btn-price {
+            display: block;
+            width: 100%;
+            text-align: center;
+            padding: 14px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-price-primary {
+            background: var(--gradient-sunset);
+            color: #000;
+            border: none;
+        }
+        .btn-price-primary:hover { opacity: 0.9; color: #000; }
+        .btn-price-secondary {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        .btn-price-secondary:hover { background: var(--primary-glow); }
+
+        /* ── CTA ── */
+        .cta-section {
+            text-align: center;
+            padding: 120px 0;
+            position: relative;
+        }
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .cta-section h2 { margin-bottom: 16px; }
+
+        /* ── FOOTER ── */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 48px 0;
+        }
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 24px;
+        }
+        .footer-links { display: flex; gap: 24px; }
+        .footer-links a { color: var(--text-muted); font-size: 0.85rem; }
+        .footer-links a:hover { color: var(--text); }
+        .footer-copy { font-size: 0.8rem; color: var(--text-muted); }
+        .footer-shield {
+            font-size: 0.75rem;
+            color: var(--terracotta);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* ── MOBILE ── */
+        @media (max-width: 768px) {
+            .nav-links a:not(.nav-cta) { display: none; }
+            .stats { gap: 32px; flex-wrap: wrap; }
+            .steps { grid-template-columns: 1fr; gap: 16px; }
+            .pricing-grid { grid-template-columns: 1fr; }
+            .footer-content { flex-direction: column; text-align: center; }
+            .footer-links { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <!-- NAV -->
+    <nav>
+        <div class="container">
+            <div class="logo">Jerry</div>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#how-it-works">How It Works</a>
+                <a href="#pricing">Pricing</a>
+                <a href="#security">Security</a>
+                <a class="nav-cta" href="#cta">Get Started</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="container fade-in">
+            <div class="hero-badge">
+                <span>Shopify Native</span> &middot; AI-Powered Customer Service
+            </div>
+            <h1>
+                Customer Service<br>
+                <span class="gradient-text">That Never Sleeps</span>
+            </h1>
+            <p class="hero-sub">
+                Jerry is an AI customer service agent for Shopify stores.
+                Product questions, order tracking, returns &mdash; handled instantly, 24/7, in any language.
+            </p>
+            <div class="hero-buttons">
+                <a class="btn-primary" href="#cta">Start Free Trial &rarr;</a>
+                <a class="btn-secondary" href="#how-it-works">See How It Works</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- STATS -->
+    <div class="container fade-in">
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value">&lt;2s</div>
+                <div class="stat-label">Response Time</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">24/7</div>
+                <div class="stat-label">Always On</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">50+</div>
+                <div class="stat-label">Languages</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">100%</div>
+                <div class="stat-label">Shopify Native</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PROBLEM -->
+    <section class="problem" id="problem">
+        <div class="container">
+            <div class="section-label">The Problem</div>
+            <h2>Your customers expect <span class="gradient-text">instant answers</span></h2>
+            <p class="section-desc">But you can't afford a 24/7 support team. And generic chatbots don't know your products.</p>
+            <div class="problem-grid fade-in">
+                <div class="problem-card">
+                    <div class="problem-icon">&#9203;</div>
+                    <h3>Slow Response Times</h3>
+                    <p>Customers abandon carts when support takes hours. 53% expect a response within 10 minutes.</p>
+                </div>
+                <div class="problem-card">
+                    <div class="problem-icon">&#127760;</div>
+                    <h3>Limited Hours &amp; Languages</h3>
+                    <p>Your team sleeps. Your international customers don't. Missed queries mean missed revenue.</p>
+                </div>
+                <div class="problem-card">
+                    <div class="problem-icon">&#129302;</div>
+                    <h3>Generic Chatbots</h3>
+                    <p>They don't know your products, your policies, or your brand voice. Customers can tell.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section id="features">
+        <div class="container">
+            <div class="section-label">Features</div>
+            <h2><span class="gradient-text">Jerry</span> knows your store</h2>
+            <p class="section-desc">Automatic product sync, real-time inventory, and intelligent conversation &mdash; not scripted responses.</p>
+            <div class="features-grid fade-in">
+                <div class="feature-card">
+                    <div class="feature-icon">&#128269;</div>
+                    <h3>Product Intelligence</h3>
+                    <p>Jerry syncs your entire Shopify catalog and uses semantic search to find exactly what customers are looking for &mdash; even with vague descriptions.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#128230;</div>
+                    <h3>Order Tracking</h3>
+                    <p>Real-time order status, shipping updates, and delivery estimates. Connected directly to your Shopify orders via webhooks.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#128257;</div>
+                    <h3>Returns &amp; Refunds</h3>
+                    <p>Guides customers through your return policy, checks eligibility windows, and initiates the process &mdash; all automatically.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#127908;</div>
+                    <h3>Voice Chat</h3>
+                    <p>Built-in speech-to-text and text-to-speech using the browser's Web Speech API. No external services, no extra cost.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#128200;</div>
+                    <h3>Revenue Attribution</h3>
+                    <p>Track which conversations lead to purchases. See exactly how much revenue Jerry generates for your store.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#128680;</div>
+                    <h3>Smart Escalation</h3>
+                    <p>When Jerry can't help, it seamlessly escalates to your human team with full conversation context. No dead ends.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section id="how-it-works" style="background: var(--bg-subtle); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+        <div class="container" style="text-align: center;">
+            <div class="section-label">How It Works</div>
+            <h2>Live in <span class="gradient-text">three steps</span></h2>
+            <p class="section-desc" style="margin: 0 auto;">No code required. Jerry connects to your Shopify store and starts learning immediately.</p>
+            <div class="steps fade-in">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Install</h3>
+                    <p>Add Jerry to your Shopify store with one click. The widget appears on your storefront in seconds.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Train</h3>
+                    <p>Jerry automatically syncs your product catalog, collections, and store policies. No manual configuration.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Launch</h3>
+                    <p>Go live and start handling customer queries instantly. Monitor conversations and revenue from your dashboard.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECURITY -->
+    <section class="security" id="security">
+        <div class="container">
+            <div class="security-badge">&#128737; Protected by WonderwallAi</div>
+            <h2>Enterprise-grade <span class="gradient-text">AI security</span></h2>
+            <p class="section-desc">Jerry is protected by WonderwallAi &mdash; an open-source AI firewall that blocks prompt injection, data leaks, and abuse in real time.</p>
+            <div class="security-features fade-in">
+                <div class="security-item">
+                    <div class="security-check">&#10003;</div>
+                    <div>
+                        <strong>Prompt Injection Defense</strong>
+                        <span>4-layer pipeline blocks jailbreak attempts in &lt;2ms</span>
+                    </div>
+                </div>
+                <div class="security-item">
+                    <div class="security-check">&#10003;</div>
+                    <div>
+                        <strong>Data Leak Prevention</strong>
+                        <span>API keys, PII, and sensitive data are caught and redacted</span>
+                    </div>
+                </div>
+                <div class="security-item">
+                    <div class="security-check">&#10003;</div>
+                    <div>
+                        <strong>Topic Enforcement</strong>
+                        <span>Jerry stays on-topic &mdash; no free coding assistant abuse</span>
+                    </div>
+                </div>
+                <div class="security-item">
+                    <div class="security-check">&#10003;</div>
+                    <div>
+                        <strong>Canary Tokens</strong>
+                        <span>Detects system prompt extraction with zero false positives</span>
+                    </div>
+                </div>
+            </div>
+            <p style="margin-top: 24px; font-size: 0.85rem; color: var(--text-muted);">
+                Learn more at <a href="https://github.com/Buddafest/wonderwallai" style="color: var(--terracotta);">github.com/Buddafest/wonderwallai</a>
+            </p>
+        </div>
+    </section>
+
+    <!-- PRICING -->
+    <section id="pricing">
+        <div class="container" style="text-align: center;">
+            <div class="section-label">Pricing</div>
+            <h2>Simple, transparent <span class="gradient-text">pricing</span></h2>
+            <p class="section-desc" style="margin: 0 auto;">No hidden fees. No per-message charges. Just a flat monthly rate with performance-based billing.</p>
+            <div class="pricing-grid fade-in">
+                <div class="price-card">
+                    <div class="price-name">Base</div>
+                    <div class="price-desc">For growing Shopify stores</div>
+                    <div class="price-amount">$299 <span>AUD/mo</span></div>
+                    <div class="price-period">+ performance billing</div>
+                    <ul class="price-features">
+                        <li><span class="check">&#10003;</span> Unlimited conversations</li>
+                        <li><span class="check">&#10003;</span> Full product catalog sync</li>
+                        <li><span class="check">&#10003;</span> Order tracking &amp; returns</li>
+                        <li><span class="check">&#10003;</span> Voice chat</li>
+                        <li><span class="check">&#10003;</span> $0.50/resolution</li>
+                        <li><span class="check">&#10003;</span> 2% revenue share on attributed sales</li>
+                    </ul>
+                    <a class="btn-price btn-price-secondary" href="#cta">Get Started</a>
+                </div>
+                <div class="price-card featured">
+                    <div class="price-name">Elite</div>
+                    <div class="price-desc">For high-volume stores</div>
+                    <div class="price-amount">$1,499 <span>AUD/mo</span></div>
+                    <div class="price-period">+ performance billing</div>
+                    <ul class="price-features">
+                        <li><span class="check">&#10003;</span> Everything in Base</li>
+                        <li><span class="check">&#10003;</span> Priority support</li>
+                        <li><span class="check">&#10003;</span> Custom brand voice training</li>
+                        <li><span class="check">&#10003;</span> Advanced analytics dashboard</li>
+                        <li><span class="check">&#10003;</span> $1.00/resolution</li>
+                        <li><span class="check">&#10003;</span> 5% revenue share on attributed sales</li>
+                    </ul>
+                    <a class="btn-price btn-price-primary" href="#cta">Get Started</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section" id="cta">
+        <div class="container fade-in">
+            <div class="section-label">Get Started</div>
+            <h2>Give your customers the <span class="gradient-text">service they deserve</span></h2>
+            <p class="section-desc" style="margin: 0 auto 40px; text-align: center;">
+                Jerry handles the support. You focus on growing your business.
+            </p>
+            <div class="hero-buttons">
+                <a class="btn-primary" href="mailto:louis@buddafest.com?subject=Jerry%20%E2%80%94%20Getting%20Started">Contact Us &rarr;</a>
+                <a class="btn-secondary" href="https://github.com/Buddafest">View on GitHub</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div>
+                    <div class="logo" style="margin-bottom: 8px;">Jerry</div>
+                    <div class="footer-copy">&copy; 2026 Jerry The Customer Service Bot. All rights reserved.</div>
+                </div>
+                <div class="footer-links">
+                    <a href="#features">Features</a>
+                    <a href="#pricing">Pricing</a>
+                    <a href="#security">Security</a>
+                    <a href="https://github.com/Buddafest">GitHub</a>
+                </div>
+                <div class="footer-shield">
+                    &#128737; Protected by <a href="https://github.com/Buddafest/wonderwallai" style="color: var(--terracotta);">WonderwallAi</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scroll animation -->
+    <script>
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+    </script>
+</body>
+</html>
