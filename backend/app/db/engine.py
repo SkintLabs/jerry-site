@@ -128,16 +128,13 @@ async def _migrate_add_missing_columns() -> None:
     async with engine.begin() as conn:
         for table, column, col_type in migrations:
             try:
+                # IF NOT EXISTS avoids errors that poison PostgreSQL transactions
                 await conn.execute(
-                    text(f"ALTER TABLE {table} ADD COLUMN {column} {col_type}")
+                    text(f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS {column} {col_type}")
                 )
-                logger.info(f"Migration: added {table}.{column}")
+                logger.info(f"Migration: checked {table}.{column}")
             except Exception as e:
-                # Column already exists — this is fine
-                if "duplicate column" in str(e).lower() or "already exists" in str(e).lower():
-                    pass
-                else:
-                    logger.warning(f"Migration skip {table}.{column}: {e}")
+                logger.warning(f"Migration skip {table}.{column}: {e}")
 
 
 async def close_db() -> None:
