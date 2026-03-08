@@ -4,11 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jerry The Customer Service Bot Widget Demo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #f0f2f5;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #1a1815;
+            color: #d4b896;
             min-height: 100vh;
         }
         .demo-store {
@@ -17,21 +21,47 @@
             padding: 40px 20px;
         }
         .demo-banner {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            background: linear-gradient(135deg, #264653 0%, #1a1815 50%, #264653 100%);
             color: white;
-            padding: 32px;
-            border-radius: 16px;
-            margin-bottom: 24px;
+            padding: 40px 32px;
+            border-radius: 20px;
+            margin-bottom: 28px;
             text-align: center;
+            border: 1px solid #2a2520;
+            position: relative;
+            overflow: hidden;
+        }
+        .demo-banner::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at 30% 20%, rgba(231,111,81,0.12) 0%, transparent 60%),
+                        radial-gradient(circle at 70% 80%, rgba(244,162,97,0.08) 0%, transparent 50%);
+            pointer-events: none;
         }
         .demo-banner h1 {
+            font-family: 'Noto Serif', Georgia, serif;
             font-size: 28px;
-            margin-bottom: 8px;
+            font-weight: 900;
+            margin-bottom: 10px;
+            position: relative;
         }
+        .demo-banner h1 .jerry { color: #f4a261; }
         .demo-banner p {
-            color: #ccc;
+            color: #d4b896;
             font-size: 14px;
+            position: relative;
         }
+        .demo-banner p strong { color: #e76f51; }
+
+        h2.section-title {
+            font-family: 'Noto Serif', Georgia, serif;
+            margin-bottom: 16px;
+            color: #ede8e0;
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
         .demo-products {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -39,14 +69,19 @@
             margin-top: 24px;
         }
         .demo-product {
-            background: white;
-            border-radius: 12px;
+            background: #12110f;
+            border-radius: 14px;
             overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border: 1px solid #2a2520;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .demo-product:hover {
+            border-color: #3d3530;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
         .demo-product-img {
             height: 180px;
-            background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+            background: linear-gradient(135deg, #1a1815, #264653);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -56,35 +91,55 @@
             padding: 16px;
         }
         .demo-product-info h3 {
+            font-family: 'Inter', sans-serif;
             font-size: 14px;
             margin-bottom: 4px;
+            color: #ede8e0;
+            font-weight: 600;
         }
         .demo-product-info .price {
-            color: #FF6B35;
+            color: #e76f51;
             font-weight: 700;
             font-size: 16px;
+            font-family: 'Noto Serif', serif;
         }
         .demo-note {
             text-align: center;
-            color: #666;
+            color: #8a7e72;
             font-size: 13px;
             margin-top: 32px;
-            padding: 16px;
-            background: white;
-            border-radius: 8px;
+            padding: 20px;
+            background: #12110f;
+            border-radius: 12px;
+            border: 1px solid #2a2520;
         }
-        .demo-note strong { color: #FF6B35; }
+        .demo-note strong { color: #f4a261; }
+        .demo-note code {
+            background: rgba(231,111,81,0.1);
+            color: #e76f51;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 600px) {
+            .demo-store { padding: 20px 12px; }
+            .demo-banner { padding: 28px 20px; }
+            .demo-banner h1 { font-size: 22px; }
+            .demo-products { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .demo-product-img { height: 140px; font-size: 36px; }
+        }
     </style>
 </head>
 <body>
     <div class="demo-store">
         <div class="demo-banner">
-            <h1>Jerry The Customer Service Bot Demo Store</h1>
-            <p>This is a fake store page to demonstrate the Jerry The Customer Service Bot chat widget.</p>
-            <p>Click the orange chat bubble in the bottom-right corner to try it!</p>
+            <h1><span class="jerry">Jerry</span> Demo Store</h1>
+            <p>This is a sample store to demonstrate the <strong>Jerry</strong> chat widget.</p>
+            <p>Click the chat bubble in the bottom-right corner to try it!</p>
         </div>
 
-        <h2 style="margin-bottom: 16px; color: #1a1a2e;">Featured Products</h2>
+        <h2 class="section-title">Featured Products</h2>
         <div class="demo-products">
             <div class="demo-product">
                 <div class="demo-product-img">👢</div>
@@ -118,7 +173,7 @@
 
         <div class="demo-note">
             <p>
-                <strong>How store owners install Jerry The Customer Service Bot:</strong> Just paste a single
+                <strong>How store owners install Jerry:</strong> Just paste a single
                 <code>&lt;script&gt;</code> tag into their Shopify theme.
             </p>
         </div>
@@ -135,7 +190,7 @@
             script.src = '/static/sunsetbot-widget.iife.js';
             script.setAttribute('data-shop', 'sunsetbot.myshopify.com');
             script.setAttribute('data-server', window.location.origin);
-            script.setAttribute('data-color', '#FF6B35');
+            script.setAttribute('data-color', '#e76f51');
             document.body.appendChild(script);
         })();
     </script>

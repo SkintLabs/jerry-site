@@ -168,8 +168,30 @@ async def lifespan(app: FastAPI):
         from wonderwallai import Wonderwall
         from wonderwallai.patterns.topics import ECOMMERCE_TOPICS
         embedding_model = product_intelligence.embedding_model if product_intelligence else None
+
+        # Extra topics that cover natural customer language (the default
+        # ECOMMERCE_TOPICS are phrased formally; real shoppers speak casually).
+        JERRY_EXTRA_TOPICS = [
+            "Do you have any dresses shoes jackets pants shirts",
+            "Show me something in blue red black white green",
+            "I'm looking for something under 50 dollars",
+            "What do you recommend for a gift birthday anniversary",
+            "Do you have this in a different size or colour",
+            "How much does this cost what is the price",
+            "Is this item in stock available",
+            "Can you help me find something",
+            "I want to track my order where is my package",
+            "What are your best sellers most popular items",
+            "Do you have anything on sale or discounted",
+            "I need something warm for winter cold weather",
+            "What goes well with this outfit combination",
+            "Tell me more about this product details features",
+            "Do you deliver to my area my country my city",
+        ]
+
         firewall_engine = Wonderwall(
-            topics=ECOMMERCE_TOPICS,
+            topics=ECOMMERCE_TOPICS + JERRY_EXTRA_TOPICS,
+            similarity_threshold=0.20,
             embedding_model=embedding_model,
             sentinel_api_key=settings.groq_api_key if hasattr(settings, 'groq_api_key') else "",
             bot_description="a customer service chatbot that helps with shopping",

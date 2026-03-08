@@ -10,27 +10,27 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --mustard: #d4a040;
-            --terracotta: #c1666b;
-            --warm-beige: #d4b896;
-            --chocolate: #4a4032;
-            --bg: #0c0b0a;
-            --bg-subtle: #12110f;
-            --bg-card: #1a1815;
-            --bg-card-hover: #221f1b;
-            --border: #2a2520;
-            --border-hover: #3d3530;
-            --text: #d4b896;
-            --text-secondary: #c4a886;
-            --text-muted: #8a7e72;
-            --text-bright: #ede8e0;
-            --primary: #c1666b;
-            --primary-hover: #d47a7f;
-            --primary-glow: rgba(193, 102, 107, 0.12);
-            --accent: #d4a040;
-            --accent-hover: #e0b050;
-            --gradient-warm: linear-gradient(135deg, #c1666b 0%, #d4a040 100%);
-            --gradient-text: linear-gradient(135deg, #c1666b 0%, #d4a040 50%, #d4b896 100%);
+            --mustard: #f4a261;
+            --terracotta: #e76f51;
+            --warm-beige: #c8d6e5;
+            --chocolate: #264653;
+            --bg: #1a2332;
+            --bg-subtle: #1e2a3a;
+            --bg-card: #223344;
+            --bg-card-hover: #2a3d50;
+            --border: #2a3a4a;
+            --border-hover: #3d5060;
+            --text: #c8d6e5;
+            --text-secondary: #b0c4d8;
+            --text-muted: #7f8fa6;
+            --text-bright: #f0f0f0;
+            --primary: #e76f51;
+            --primary-hover: #ee8066;
+            --primary-glow: rgba(231, 111, 81, 0.12);
+            --accent: #f4a261;
+            --accent-hover: #f5b070;
+            --gradient-warm: linear-gradient(135deg, #e76f51 0%, #f4a261 100%);
+            --gradient-text: linear-gradient(135deg, #e76f51 0%, #f4a261 50%, #e9c46a 100%);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -57,7 +57,7 @@
         /* ── NAV ── */
         nav {
             position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-            background: rgba(12, 11, 10, 0.88);
+            background: rgba(26, 35, 50, 0.88);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border-bottom: 1px solid var(--border);
@@ -87,7 +87,7 @@
         .hero::before {
             content: '';
             position: absolute; top: 0; right: 0; width: 50%; height: 700px;
-            background: radial-gradient(circle, rgba(193,102,107,0.08) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(231,111,81,0.08) 0%, transparent 70%);
             pointer-events: none;
         }
         .hero-grid {
@@ -112,23 +112,23 @@
             background: var(--primary); color: var(--text-bright); padding: 16px 36px;
             border-radius: 100px; font-weight: 700; font-size: 1rem; border: none;
             cursor: pointer; transition: all 0.25s; display: inline-flex; align-items: center; gap: 8px;
-            box-shadow: 0 4px 24px rgba(193,102,107,0.25);
+            box-shadow: 0 4px 24px rgba(231,111,81,0.25);
         }
-        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); color: var(--text-bright); box-shadow: 0 6px 32px rgba(193,102,107,0.35); }
+        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); color: var(--text-bright); box-shadow: 0 6px 32px rgba(231,111,81,0.35); }
         .btn-secondary {
             background: transparent; color: var(--warm-beige); padding: 16px 36px;
             border-radius: 100px; font-weight: 600; font-size: 1rem;
             border: 1px solid var(--chocolate); cursor: pointer; transition: all 0.25s;
             display: inline-flex; align-items: center; gap: 8px;
         }
-        .btn-secondary:hover { border-color: var(--primary); color: var(--primary); background: rgba(193,102,107,0.06); }
+        .btn-secondary:hover { border-color: var(--primary); color: var(--primary); background: rgba(231,111,81,0.06); }
         .btn-demo {
             background: transparent; color: var(--accent); padding: 16px 36px;
             border-radius: 100px; font-weight: 600; font-size: 1rem;
             border: 1px solid var(--accent); cursor: pointer; transition: all 0.25s;
             display: inline-flex; align-items: center; gap: 8px;
         }
-        .btn-demo:hover { border-color: var(--accent-hover); color: var(--accent-hover); background: rgba(212,160,64,0.06); }
+        .btn-demo:hover { border-color: var(--accent-hover); color: var(--accent-hover); background: rgba(244,162,97,0.06); }
 
         /* Mock chat widget in hero */
         .hero-chat {
@@ -240,7 +240,7 @@
         .cap-content .cap-tag {
             display: inline-block; font-size: 0.72rem; text-transform: uppercase;
             letter-spacing: 0.12em; font-weight: 700; color: var(--accent);
-            background: rgba(212,160,64,0.1); border: 1px solid rgba(212,160,64,0.2);
+            background: rgba(244,162,97,0.1); border: 1px solid rgba(244,162,97,0.2);
             padding: 4px 12px; border-radius: 100px; margin-bottom: 16px;
         }
         .cap-content h3 {
@@ -391,7 +391,7 @@
         }
         .btn-price-primary {
             background: var(--primary); color: var(--text-bright); border: none;
-            box-shadow: 0 4px 20px rgba(193,102,107,0.2);
+            box-shadow: 0 4px 20px rgba(231,111,81,0.2);
         }
         .btn-price-primary:hover { background: var(--primary-hover); color: var(--text-bright); }
         .btn-price-secondary {

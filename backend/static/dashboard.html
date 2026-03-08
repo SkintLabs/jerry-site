@@ -9,16 +9,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --terracotta: #c1666b;
-            --gold: #d4a040;
-            --warm-beige: #d4b896;
-            --chocolate: #4a4032;
-            --bg: #0c0b0a;
-            --bg-card: #1a1815;
-            --border: #2a2520;
-            --text: #d4b896;
-            --text-muted: #8a7e72;
-            --text-bright: #ede8e0;
+            --burnt-orange: #e76f51;
+            --coral: #f4a261;
+            --warm-sand: #e9c46a;
+            --deep-purple: #264653;
+            --bg: #1a2332;
+            --bg-card: #1e2a3a;
+            --border: #2a3a4a;
+            --text: #c8d6e5;
+            --text-muted: #7f8fa6;
+            --text-bright: #f0f0f0;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -33,15 +33,15 @@
         h1, h2, h3 { font-family: 'Noto Serif', serif; color: var(--text-bright); }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
         .header h1 { font-size: 1.6rem; }
-        .header h1 span { color: var(--gold); }
+        .header h1 span { color: var(--coral); }
         .badge { display: inline-block; padding: 4px 12px; border-radius: 100px; font-size: 0.75rem; font-weight: 600; }
         .badge-active { background: rgba(76,175,80,0.15); color: #66bb6a; border: 1px solid rgba(76,175,80,0.3); }
-        .badge-inactive { background: rgba(193,102,107,0.15); color: var(--terracotta); border: 1px solid rgba(193,102,107,0.3); }
-        .badge-plan { background: rgba(212,160,64,0.15); color: var(--gold); border: 1px solid rgba(212,160,64,0.3); }
+        .badge-inactive { background: rgba(231,111,81,0.15); color: var(--burnt-orange); border: 1px solid rgba(231,111,81,0.3); }
+        .badge-plan { background: rgba(244,162,97,0.15); color: var(--coral); border: 1px solid rgba(244,162,97,0.3); }
 
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
         .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; text-align: center; }
-        .stat-value { font-family: 'Noto Serif', serif; font-size: 2rem; font-weight: 900; color: var(--gold); }
+        .stat-value { font-family: 'Noto Serif', serif; font-size: 2rem; font-weight: 900; color: var(--coral); }
         .stat-label { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
 
         .section { margin-bottom: 32px; }
@@ -49,20 +49,20 @@
         table { width: 100%; border-collapse: collapse; }
         th { text-align: left; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; padding: 8px 12px; border-bottom: 1px solid var(--border); }
         td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
-        tr:hover { background: rgba(26,24,21,0.8); }
+        tr:hover { background: rgba(30,42,58,0.8); }
 
         .resolved { color: #66bb6a; }
         .unresolved { color: var(--text-muted); }
-        .escalated { color: var(--terracotta); }
+        .escalated { color: var(--burnt-orange); }
 
         .input-row { display: flex; gap: 12px; margin-bottom: 24px; }
         .input-row input { flex: 1; background: var(--bg-card); border: 1px solid var(--border); border-radius: 100px; padding: 10px 20px; color: var(--text-bright); font-size: 0.9rem; outline: none; }
-        .input-row input:focus { border-color: var(--terracotta); }
-        .input-row button { background: var(--terracotta); color: var(--text-bright); border: none; border-radius: 100px; padding: 10px 24px; font-weight: 600; cursor: pointer; font-size: 0.9rem; }
+        .input-row input:focus { border-color: var(--burnt-orange); }
+        .input-row button { background: var(--burnt-orange); color: var(--text-bright); border: none; border-radius: 100px; padding: 10px 24px; font-weight: 600; cursor: pointer; font-size: 0.9rem; transition: opacity 0.2s; }
         .input-row button:hover { opacity: 0.9; }
 
         .loading { text-align: center; padding: 48px; color: var(--text-muted); }
-        .error { color: var(--terracotta); text-align: center; padding: 24px; }
+        .error { color: var(--burnt-orange); text-align: center; padding: 24px; }
 
         @media (max-width: 768px) {
             .stats-grid { grid-template-columns: repeat(2, 1fr); }

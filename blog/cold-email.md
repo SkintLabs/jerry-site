@@ -1,5 +1,17 @@
 # Jerry The Customer Service Bot — Cold Email Campaign
 
+## Brand Theme: Sunset Boulevard
+
+For any HTML email templates, use these brand colours:
+- **Burnt Orange** `#e76f51` — Primary accent (buttons, links, CTAs)
+- **Coral** `#f4a261` — Secondary warm accent (highlights, "Jerry" text)
+- **Warm Sand** `#e9c46a` — Background highlights
+- **Deep Purple** `#264653` — Dark contrast / text backgrounds
+- **Headers:** Noto Serif Bold (fallback: Georgia, serif)
+- **Body:** Inter (fallback: system sans-serif)
+
+---
+
 ## Overview
 
 4-email cadence targeting Shopify store owners. Goal: get them to try the live demo and start a free trial.

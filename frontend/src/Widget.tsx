@@ -69,7 +69,7 @@ export function Widget({ shop, server, primaryColor, position }: WidgetProps) {
 
   // Voice chat state
   const [isRecording, setIsRecording] = useState(false)
-  const [ttsEnabled, setTtsEnabled] = useState(false)
+  const [ttsEnabled, setTtsEnabled] = useState(true)
   const [sttSupported, setSttSupported] = useState(false)
   const [ttsSupported, setTtsSupported] = useState(false)
 
@@ -81,7 +81,7 @@ export function Widget({ shop, server, primaryColor, position }: WidgetProps) {
   const maxReconnectAttempts = 5
   const recognitionRef = useRef<any>(null)
   const synthRef = useRef<SpeechSynthesis | null>(null)
-  const ttsEnabledRef = useRef(false)
+  const ttsEnabledRef = useRef(true)
   const preferredVoiceRef = useRef<SpeechSynthesisVoice | null>(null)
 
   // Auto-scroll to bottom on new messages
@@ -329,9 +329,10 @@ export function Widget({ shop, server, primaryColor, position }: WidgetProps) {
 
     recognition.onresult = (event: any) => {
       const transcript = event.results[0][0].transcript.trim()
-      if (transcript) {
-        setInput(transcript)
-        inputRef.current?.focus()
+      if (transcript && wsRef.current?.readyState === WebSocket.OPEN) {
+        addMessage('user', transcript)
+        wsRef.current.send(JSON.stringify({ message: transcript }))
+        setInput('')
       }
     }
 
@@ -365,7 +366,7 @@ export function Widget({ shop, server, primaryColor, position }: WidgetProps) {
           <div className="sb-header">
             <div className="sb-header-info">
               <div className="sb-header-dot" />
-              <span className="sb-header-title">Shopping Assistant</span>
+              <span className="sb-header-title">Jerry</span>
             </div>
             <div className="sb-header-actions">
               {ttsSupported && (
@@ -901,8 +902,8 @@ function getStyles(primaryColor: string): string {
     @media (max-width: 440px) {
       .sb-panel {
         width: calc(100vw - 16px);
-        height: calc(100vh - 100px);
-        bottom: 80px;
+        height: calc(100vh - 80px);
+        bottom: 70px;
         left: 8px !important;
         right: 8px !important;
         border-radius: 12px;
