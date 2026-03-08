@@ -330,7 +330,7 @@ async def websocket_chat(
                 )
                 store_record = result.scalar_one_or_none()
             if store_record:
-                valid_statuses = {"active", "trialing"}
+                valid_statuses = {"active", "trialing", "none"}
                 if getattr(store_record, "subscription_status", "none") not in valid_statuses:
                     await websocket.close(code=4003, reason="Subscription inactive")
                     return
