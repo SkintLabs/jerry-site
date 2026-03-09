@@ -329,18 +329,26 @@ export function Widget({ shop, server, primaryColor, position, ttsDefault = fals
     recognition.onstart = () => setIsRecording(true)
 
     recognition.onresult = (event: any) => {
+      if (!event.results?.length || !event.results[0]?.length) return
       const transcript = event.results[0][0].transcript.trim()
       if (transcript && wsRef.current?.readyState === WebSocket.OPEN) {
         addMessage('user', transcript)
         wsRef.current.send(JSON.stringify({ message: transcript }))
         setInput('')
       }
+      recognitionRef.current?.stop()
     }
 
     recognition.onerror = (event: any) => {
       setIsRecording(false)
       if (event.error === 'not-allowed') {
         addMessage('system', 'Microphone access denied. Please allow microphone access in your browser settings.')
+      } else if (event.error === 'no-speech') {
+        addMessage('system', 'No speech detected. Tap the mic and speak clearly.')
+      } else if (event.error === 'network') {
+        addMessage('system', 'Voice requires an internet connection. Please check your network.')
+      } else if (event.error === 'service-not-allowed') {
+        addMessage('system', 'Voice is not available in this browser. Try Chrome on desktop or Android.')
       }
     }
 

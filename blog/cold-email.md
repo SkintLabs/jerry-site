@@ -133,6 +133,9 @@ A few things to know:
 - Every conversation is protected by WonderwallAi (our AI firewall)
 - Jerry escalates to a human when it detects frustration or complex issues
 
+**A note on voice chat:**
+Jerry supports voice input and spoken responses. Voice input (speak-to-ask) works best on Chrome for desktop and Android. On iPhones (Safari), Jerry can speak responses back but voice input isn't supported by Apple yet — your customers can always type instead. Voice responses can be toggled on/off by clicking the speaker icon in the chat header.
+
 If you have any questions, just reply to this email. I read every one.
 
 Cheers,
