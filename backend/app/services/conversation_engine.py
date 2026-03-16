@@ -293,55 +293,62 @@ class ConversationEngine:
         self._product_intelligence = _MockProductIntelligence()
         self._context_manager = _InMemoryContextManager()
 
-    async def process_message(self, message: str, context: ConversationContext) -> EngineResponse:
+       async def process_message(self, message: str, context: ConversationContext) -> EngineResponse:
         
-        # --- STEP 0: THE WONDERWALL AI FIREWALL ---
-if firewall_engine is not None:
-    try:
-        # Inbound scan
-        verdict = await firewall_engine.scan_inbound(user_message)
-        if not verdict.allowed:
-            await websocket.send_json({
-                "type": "message",
-                "text": verdict.message,
-                "intent": "firewall_block",
-                "products": [],
-                "escalated": False,
-                "session_id": session_id,
-            })
-            # Still track the blocked attempt for analytics
-            await conversation_engine.analytics.track_conversation(
-                store_id, session_id, user_message, "", "firewall_block", {}, 0, False
-            )
-            continue
-    except Exception as e:
-        logger.error(f"Firewall inbound error (allowing): {e}")
+        # ── STEP 0: WONDERWALL AI FIREWALL (real SDK, not placeholder) ──
+        if firewall_engine is not None:
+            try:
+                # Inbound scan
+                verdict = await firewall_engine.scan_inbound(message)
+                if not verdict.allowed:
+                    await websocket.send_json({
+                        "type": "message",
+                        "text": verdict.message,
+                        "intent": "firewall_block",
+                        "products": [],
+                        "escalated": False,
+                        "session_id": session_id,
+                    })
+                    # Still track the blocked attempt for analytics
+                    await self.analytics.track_conversation(
+                        store_id=store_id,
+                        session_id=session_id,
+                        message=message,
+                        response_text="",
+                        intent="firewall_block",
+                        entities={},
+                        products_shown=0,
+                        escalated=False,
+                    )
+                    continue
+            except Exception as e:
+                logger.error(f"Firewall inbound error (allowing): {e}")
 
-# ... (rest of your processing)
-
-# After LLM response
-if firewall_engine is not None:
-    egress_verdict = await firewall_engine.scan_outbound(
-        engine_response.text, context.canary_token or ""
-    )
-    engine_response.text = egress_verdict.message
-
-        # --- STEP 1: VALIDATION ---
+        # ── STEP 1: VALIDATION ──
         if len(message) > MAX_MESSAGE_LENGTH:
-            return EngineResponse(text="Message too long!", intent="general", entities={}, session_id=context.session_id)
+            return EngineResponse(
+                text="Message too long!", 
+                intent="general", 
+                entities={}, 
+                session_id=context.session_id
+            )
 
-        # --- STEP 2: LOGIC PIPELINE ---
+        # ── STEP 2: LOGIC PIPELINE ──
         intent = self.intent_classifier.classify(message, context)
         context.intent = intent
         entities = self.entity_extractor.extract(message)
         
         products = []
         if intent == "product_search":
-            products = await self._product_intelligence.search(message, context.store_id, entities)
+            products = await self._product_intelligence.search(
+                message, context.store_id, entities
+            )
 
-        response_text = await self.response_generator.generate(message, context, intent, entities, products)
+        response_text = await self.response_generator.generate(
+            message, context, intent, entities, products
+        )
 
-        # --- STEP 3: ESCALATION & HISTORY ---
+        # ── STEP 3: ESCALATION & HISTORY ──
         escalation = self.escalation_handler.check(message, response_text, context)
         if escalation:
             response_text += f"\n\nConnecting you to a human ({escalation.reason})..."
@@ -349,7 +356,17 @@ if firewall_engine is not None:
 
         context.add_message("user", message)
         context.add_message("assistant", response_text)
-        
+
+        # ── STEP 4: OUTBOUND FIREWALL SCAN ──
+        if firewall_engine is not None:
+            try:
+                egress_verdict = await firewall_engine.scan_outbound(
+                    response_text, context.canary_token or ""
+                )
+                response_text = egress_verdict.message
+            except Exception as e:
+                logger.error(f"Firewall outbound error (allowing): {e}")
+
         return EngineResponse(
             text=response_text,
             intent=intent,
@@ -358,16 +375,3 @@ if firewall_engine is not None:
             escalated=bool(escalation),
             session_id=context.session_id
         )
-
-# ============================================================================
-# STUBS & HELPERS
-# ============================================================================
-
-class _MockProductIntelligence:
-    async def search(self, q, s, f): return []
-
-class _InMemoryContextManager:
-    async def save_context(self, c): pass
-
-if _name_ == "_main_":
-    print("ConversationEngine with WonderwallAi Shield initialized.")
