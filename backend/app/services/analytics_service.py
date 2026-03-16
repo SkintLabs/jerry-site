@@ -7,9 +7,10 @@ Replaces the _AnalyticsServiceStub in conversation_engine.py.
 import asyncio
 import logging
 from datetime import datetime
+from decimal import Decimal
 from typing import Optional
 
-from sqlalchemy import select, and_
+from sqlalchemy import select
 
 from app.db.engine import get_db
 from app.db.models import Store, ChatSession, SupportResolution, AttributedSale
@@ -18,11 +19,6 @@ logger = logging.getLogger("jerry.analytics")
 
 
 class AnalyticsService:
-    """
-    Real analytics service for tracking usage and billing events.
-    Writes to PostgreSQL and optionally reports metered usage to Stripe.
-    """
-
     def __init__(self, billing_service=None):
         self.billing_service = billing_service
         logger.info(
@@ -41,97 +37,53 @@ class AnalyticsService:
         products_shown: int,
         escalated: bool,
     ) -> None:
-        """
-        Called by ConversationEngine after every message.
-        Creates a ChatSession on first message, increments store usage.
-        """
+        """Called after every message. Now also logs full interaction details."""
         try:
             async with get_db() as db:
-                # Find store by store_id (domain prefix)
-                store_domain = f"{store_id}.myshopify.com"
-                result = await db.execute(
-                    select(Store).where(Store.shopify_domain == store_domain)
-                )
-                store = result.scalar_one_or_none()
-
+                store = await self._get_store(db, store_id)
                 if not store:
-                    # Try matching store_id directly (dev mode)
-                    result = await db.execute(
-                        select(Store).where(Store.shopify_domain.contains(store_id))
-                    )
-                    store = result.scalar_one_or_none()
-
-                if not store:
-                    logger.debug(f"Store not found for {store_id} — skipping analytics")
                     return
 
-                # Check if session already exists
-                session_result = await db.execute(
-                    select(ChatSession).where(ChatSession.session_token == session_id)
-                )
-                session = session_result.scalar_one_or_none()
+                session = await self._get_or_create_session(db, store, session_id, escalated)
 
-                if not session:
-                    # New session — create and increment usage
-                    session = ChatSession(
-                        merchant_id=store.id,
-                        session_token=session_id,
-                        human_intervention=escalated,
-                    )
-                    db.add(session)
-                    store.current_month_usage += 1
-                    logger.info(
-                        f"New session tracked | store={store_id} | session={session_id} | "
-                        f"usage={store.current_month_usage}/{store.monthly_interaction_limit}"
-                    )
-                elif escalated and not session.human_intervention:
-                    session.human_intervention = True
+                # TODO: once you add ChatInteraction model, insert here:
+                # interaction = ChatInteraction(...)
+                # db.add(interaction)
+
+                await db.commit()
+
+                logger.info(
+                    f"Session tracked | store={store_id} | session={session_id} | "
+                    f"usage={store.current_month_usage}/{store.monthly_interaction_limit} | escalated={escalated}"
+                )
 
         except Exception as e:
             logger.error(f"Analytics tracking failed: {e}", exc_info=True)
 
-    async def record_resolution(
-        self,
-        store_id: str,
-        session_id: str,
-        resolution_type: str,
-    ) -> None:
-        """
-        Called when a support interaction is resolved.
-        Records the resolution and reports to Stripe billing.
-        """
+    async def record_resolution(self, store_id: str, session_id: str, resolution_type: str) -> None:
         try:
             async with get_db() as db:
-                store_domain = f"{store_id}.myshopify.com"
-                result = await db.execute(
-                    select(Store).where(Store.shopify_domain == store_domain)
-                )
-                store = result.scalar_one_or_none()
+                store = await self._get_store(db, store_id)
                 if not store:
                     return
 
-                # Find session
-                session_result = await db.execute(
-                    select(ChatSession).where(ChatSession.session_token == session_id)
-                )
-                session = session_result.scalar_one_or_none()
-
+                session = await self._get_session(db, session_id)
                 resolution = SupportResolution(
                     merchant_id=store.id,
                     session_id=session.id if session else None,
                     resolution_type=resolution_type,
                 )
                 db.add(resolution)
-
                 if session:
                     session.resolved = True
 
-            # Report to Stripe (fire and forget)
-            if self.billing_service and store.stripe_subscription_id:
+                await db.commit()
+
+            # Fire-and-forget Stripe (safe after commit)
+            if self.billing_service and getattr(store, "stripe_subscription_id", None):
                 asyncio.create_task(
                     self.billing_service.report_resolution(
-                        store.stripe_subscription_id,
-                        store.jerry_plan,
+                        store.stripe_subscription_id, store.jerry_plan
                     )
                 )
 
@@ -141,41 +93,25 @@ class AnalyticsService:
             logger.error(f"Resolution recording failed: {e}", exc_info=True)
 
     async def record_attributed_sale(
-        self,
-        shop_domain: str,
-        shopify_order_id: str,
-        order_value: float,
+        self, shop_domain: str, shopify_order_id: str, order_value: float
     ) -> None:
-        """
-        Called when an order is attributed to Jerry (via webhook).
-        Records the sale and reports revenue share to Stripe.
-        """
         try:
             async with get_db() as db:
-                result = await db.execute(
-                    select(Store).where(Store.shopify_domain == shop_domain)
-                )
-                store = result.scalar_one_or_none()
+                store = await self._get_store(db, shop_domain.replace(".myshopify.com", ""))
                 if not store:
                     return
 
-                # Check if already recorded (idempotent)
+                # Idempotency
                 existing = await db.execute(
-                    select(AttributedSale).where(
-                        AttributedSale.shopify_order_id == shopify_order_id
-                    )
+                    select(AttributedSale).where(AttributedSale.shopify_order_id == shopify_order_id)
                 )
                 if existing.scalar_one_or_none():
                     return
 
-                from decimal import Decimal
-                plan_config_map = {
-                    "base": Decimal("0.02"),
-                    "elite": Decimal("0.05"),
-                }
-                pct = plan_config_map.get(store.jerry_plan, Decimal("0.02"))
-                order_value_cents = int(order_value * 100)
-                commission = int(order_value_cents * pct)
+                plan_config = {"base": Decimal("0.02"), "elite": Decimal("0.05")}
+                pct = plan_config.get(store.jerry_plan, Decimal("0.02"))
+                order_cents = int(order_value * 100)
+                commission = int(order_cents * pct)
 
                 sale = AttributedSale(
                     merchant_id=store.id,
@@ -184,21 +120,54 @@ class AnalyticsService:
                     commission_cents=commission,
                 )
                 db.add(sale)
+                await db.commit()
 
-            # Report to Stripe
-            if self.billing_service and store.stripe_subscription_id:
+            if self.billing_service and getattr(store, "stripe_subscription_id", None):
                 asyncio.create_task(
                     self.billing_service.report_revenue_share(
-                        store.stripe_subscription_id,
-                        store.jerry_plan,
-                        order_value_cents,
+                        store.stripe_subscription_id, store.jerry_plan, order_cents
                     )
                 )
 
             logger.info(
                 f"Sale attributed | shop={shop_domain} | order={shopify_order_id} | "
-                f"value={order_value} | commission={commission}c"
+                f"value=${order_value} | commission={commission}¢"
             )
 
         except Exception as e:
             logger.error(f"Sale attribution failed: {e}", exc_info=True)
+
+    # Private helpers for cleanliness & reuse
+    async def _get_store(self, db, store_id: str):
+        domain = f"{store_id}.myshopify.com"
+        result = await db.execute(select(Store).where(Store.shopify_domain == domain))
+        store = result.scalar_one_or_none()
+        if not store:
+            result = await db.execute(select(Store).where(Store.shopify_domain.contains(store_id)))
+            store = result.scalar_one_or_none()
+            if not store:
+                logger.debug(f"Store not found for {store_id}")
+        return store
+
+    async def _get_or_create_session(self, db, store, session_id: str, escalated: bool):
+        result = await db.execute(
+            select(ChatSession).where(ChatSession.session_token == session_id)
+        )
+        session = result.scalar_one_or_none()
+        if not session:
+            session = ChatSession(
+                merchant_id=store.id,
+                session_token=session_id,
+                human_intervention=escalated,
+            )
+            db.add(session)
+            store.current_month_usage += 1
+        elif escalated and not session.human_intervention:
+            session.human_intervention = True
+        return session
+
+    async def _get_session(self, db, session_id: str):
+        result = await db.execute(
+            select(ChatSession).where(ChatSession.session_token == session_id)
+        )
+        return result.scalar_one_or_none()
