@@ -120,33 +120,15 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.error(f"Database initialization failed: {e}", exc_info=True)
 
-    # --- STARTUP: Initialize AI Services ---
-    try:
-        from app.services.conversation_engine import ConversationEngine
-        conversation_engine = ConversationEngine()
-        conversation_engine.analytics = analytics_service          # ← your new service
-conversation_engine.firewall_engine = firewall_engine      # ← WonderwallAi
-        logger.info("ConversationEngine initialized.")
-    except Exception as e:
-        logger.error(f"ConversationEngine failed to initialize: {e}", exc_info=True)
-        conversation_engine = None
-
+       # --- STARTUP: Initialize AI Services (correct order) ---
     try:
         from app.services.product_intelligence import ProductIntelligence
         product_intelligence = ProductIntelligence()
         logger.info("ProductIntelligence initialized.")
     except Exception as e:
-        logger.error(f"ProductIntelligence failed to initialize: {e}", exc_info=True)
+        logger.error(f"ProductIntelligence failed: {e}", exc_info=True)
         product_intelligence = None
 
-    # Wire real PI into engine
-    if conversation_engine and product_intelligence:
-        conversation_engine._product_intelligence = product_intelligence
-        logger.info("Services initialized — Jerry The Customer Service Bot is ready.")
-    else:
-        logger.warning("Jerry The Customer Service Bot started in DEGRADED mode — some services unavailable.")
-
-    # --- STARTUP: Initialize Billing ---
     try:
         from app.services.billing_service import BillingService
         billing_service = BillingService()
@@ -154,25 +136,19 @@ conversation_engine.firewall_engine = firewall_engine      # ← WonderwallAi
         logger.error(f"BillingService failed: {e}", exc_info=True)
         billing_service = None
 
-    # --- STARTUP: Initialize Analytics ---
     try:
         from app.services.analytics_service import AnalyticsService
         analytics_service = AnalyticsService(billing_service=billing_service)
-        if conversation_engine:
-            conversation_engine.analytics = analytics_service
         logger.info("AnalyticsService initialized.")
     except Exception as e:
         logger.error(f"AnalyticsService failed: {e}", exc_info=True)
         analytics_service = None
 
-    # --- STARTUP: Initialize Firewall (WonderwallAi SDK) ---
     try:
         from wonderwallai import Wonderwall
         from wonderwallai.patterns.topics import ECOMMERCE_TOPICS
-        embedding_model = product_intelligence.embedding_model if product_intelligence else None
 
-        # Extra topics that cover natural customer language (the default
-        # ECOMMERCE_TOPICS are phrased formally; real shoppers speak casually).
+        # Extra casual topics for real shoppers
         JERRY_EXTRA_TOPICS = [
             "Do you have any dresses shoes jackets pants shirts",
             "Show me something in blue red black white green",
@@ -194,7 +170,7 @@ conversation_engine.firewall_engine = firewall_engine      # ← WonderwallAi
         firewall_engine = Wonderwall(
             topics=ECOMMERCE_TOPICS + JERRY_EXTRA_TOPICS,
             similarity_threshold=0.20,
-            embedding_model=embedding_model,
+            embedding_model=product_intelligence.embedding_model if product_intelligence else None,
             sentinel_api_key=settings.groq_api_key if hasattr(settings, 'groq_api_key') else "",
             bot_description="a customer service chatbot that helps with shopping",
             canary_prefix="JERRY-CANARY-",
@@ -207,10 +183,26 @@ conversation_engine.firewall_engine = firewall_engine      # ← WonderwallAi
                 "question about our products or orders?"
             ),
         )
+        logger.info("WonderwallAi firewall initialized.")
     except Exception as e:
         logger.error(f"Wonderwall firewall failed: {e}", exc_info=True)
         firewall_engine = None
 
+    # --- Finally create the engine and wire everything ---
+    try:
+        from app.services.conversation_engine import ConversationEngine
+        conversation_engine = ConversationEngine()
+        if analytics_service:
+            conversation_engine.analytics = analytics_service
+        if firewall_engine:
+            conversation_engine.firewall_engine = firewall_engine
+        if product_intelligence:
+            conversation_engine._product_intelligence = product_intelligence
+        logger.info("ConversationEngine initialized with WonderwallAi + Analytics.")
+    except Exception as e:
+        logger.error(f"ConversationEngine failed: {e}", exc_info=True)
+        conversation_engine = None
+        
     # Log integration status
     if settings.shopify_configured:
         logger.info("Shopify integration: CONFIGURED")
