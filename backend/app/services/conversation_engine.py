@@ -367,6 +367,19 @@ class ConversationEngine:
             except Exception as e:
                 logger.error(f"Firewall outbound error (allowing): {e}")
 
+                   # ── STEP 5: SAVE FULL INTERACTION TO DB (Analytics + debugging) ──
+        if hasattr(self, "analytics") and self.analytics is not None:
+            await self.analytics.track_conversation(
+                store_id=context.store_id,
+                session_id=context.session_id,
+                message=message,
+                response_text=response_text,
+                intent=intent,
+                entities=entities,
+                products_shown=len(products),
+                escalated=bool(escalation),
+            )
+           
         return EngineResponse(
             text=response_text,
             intent=intent,
