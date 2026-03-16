@@ -124,6 +124,8 @@ async def lifespan(app: FastAPI):
     try:
         from app.services.conversation_engine import ConversationEngine
         conversation_engine = ConversationEngine()
+        conversation_engine.analytics = analytics_service          # ← your new service
+conversation_engine.firewall_engine = firewall_engine      # ← WonderwallAi
         logger.info("ConversationEngine initialized.")
     except Exception as e:
         logger.error(f"ConversationEngine failed to initialize: {e}", exc_info=True)
