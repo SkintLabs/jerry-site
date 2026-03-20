@@ -293,51 +293,48 @@ class ConversationEngine:
         self._product_intelligence = _MockProductIntelligence()
         self._context_manager = _InMemoryContextManager()
 
-       async def process_message(self, message: str, context: ConversationContext) -> EngineResponse:
-        
-        # ── STEP 0: WONDERWALL AI FIREWALL (real SDK, not placeholder) ──
-        if firewall_engine is not None:
+    async def process_message(self, message: str, context: ConversationContext) -> EngineResponse:
+
+        # ── STEP 0: WONDERWALL AI FIREWALL (inbound scan) ──
+        if hasattr(self, "firewall_engine") and self.firewall_engine is not None:
             try:
-                # Inbound scan
-                verdict = await firewall_engine.scan_inbound(message)
+                verdict = await self.firewall_engine.scan_inbound(message)
                 if not verdict.allowed:
-                    await websocket.send_json({
-                        "type": "message",
-                        "text": verdict.message,
-                        "intent": "firewall_block",
-                        "products": [],
-                        "escalated": False,
-                        "session_id": session_id,
-                    })
-                    # Still track the blocked attempt for analytics
-                    await self.analytics.track_conversation(
-                        store_id=store_id,
-                        session_id=session_id,
-                        message=message,
-                        response_text="",
+                    # Track the blocked attempt for analytics
+                    if hasattr(self, "analytics") and self.analytics is not None:
+                        await self.analytics.track_conversation(
+                            store_id=context.store_id,
+                            session_id=context.session_id,
+                            message=message,
+                            response_text=verdict.message,
+                            intent="firewall_block",
+                            entities={},
+                            products_shown=0,
+                            escalated=False,
+                        )
+                    return EngineResponse(
+                        text=verdict.message,
                         intent="firewall_block",
                         entities={},
-                        products_shown=0,
-                        escalated=False,
+                        session_id=context.session_id,
                     )
-                    continue
             except Exception as e:
                 logger.error(f"Firewall inbound error (allowing): {e}")
 
         # ── STEP 1: VALIDATION ──
         if len(message) > MAX_MESSAGE_LENGTH:
             return EngineResponse(
-                text="Message too long!", 
-                intent="general", 
-                entities={}, 
-                session_id=context.session_id
+                text="Message too long!",
+                intent="general",
+                entities={},
+                session_id=context.session_id,
             )
 
         # ── STEP 2: LOGIC PIPELINE ──
         intent = self.intent_classifier.classify(message, context)
         context.intent = intent
         entities = self.entity_extractor.extract(message)
-        
+
         products = []
         if intent == "product_search":
             products = await self._product_intelligence.search(
@@ -358,28 +355,15 @@ class ConversationEngine:
         context.add_message("assistant", response_text)
 
         # ── STEP 4: OUTBOUND FIREWALL SCAN ──
-        if firewall_engine is not None:
+        if hasattr(self, "firewall_engine") and self.firewall_engine is not None:
             try:
-                egress_verdict = await firewall_engine.scan_outbound(
+                egress_verdict = await self.firewall_engine.scan_outbound(
                     response_text, context.canary_token or ""
                 )
                 response_text = egress_verdict.message
             except Exception as e:
                 logger.error(f"Firewall outbound error (allowing): {e}")
 
-                   # ── STEP 5: SAVE FULL INTERACTION TO DB (Analytics + debugging) ──
-        if hasattr(self, "analytics") and self.analytics is not None:
-            await self.analytics.track_conversation(
-                store_id=context.store_id,
-                session_id=context.session_id,
-                message=message,
-                response_text=response_text,
-                intent=intent,
-                entities=entities,
-                products_shown=len(products),
-                escalated=bool(escalation),
-             )
-            
         # ── STEP 5: SAVE FULL INTERACTION TO DB ──
         if hasattr(self, "analytics") and self.analytics is not None:
             await self.analytics.track_conversation(
@@ -392,12 +376,12 @@ class ConversationEngine:
                 products_shown=len(products),
                 escalated=bool(escalation),
             )
-           
+
         return EngineResponse(
             text=response_text,
             intent=intent,
             entities=entities,
             products=products,
             escalated=bool(escalation),
-            session_id=context.session_id
+            session_id=context.session_id,
         )
