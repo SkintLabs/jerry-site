@@ -66,6 +66,28 @@
         .logo { font-family: 'Noto Serif', Georgia, serif; font-size: 1.3rem; font-weight: 900; letter-spacing: -0.02em; }
         .logo .logo-jerry { color: var(--accent); }
         .logo .logo-sub { color: var(--primary); font-size: 0.65em; font-weight: 700; }
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .skint-badge {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.6rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 4px 10px;
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        .skint-badge:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+        }
         .nav-links { display: flex; gap: 28px; align-items: center; }
         .nav-links a { color: var(--text-secondary); font-size: 0.88rem; font-weight: 500; }
         .nav-links a:hover { color: var(--text); }
@@ -468,15 +490,18 @@
     <!-- NAV -->
     <nav>
         <div class="container">
-            <div class="logo">
-                <span class="logo-jerry">Jerry</span> <span class="logo-sub">The Customer Service Bot</span>
+            <div class="nav-brand">
+                <div class="logo">
+                    <span class="logo-jerry">Jerry</span> <span class="logo-sub">The Customer Service Bot</span>
+                </div>
+                <a href="https://skintlabs.ai" class="skint-badge" target="_blank" rel="noopener">by Skint Labs</a>
             </div>
             <div class="nav-links">
                 <a href="#capabilities">Capabilities</a>
                 <a href="#features">Features</a>
                 <a href="#how-it-works">How It Works</a>
                 <a href="#pricing">Pricing</a>
-                <a class="nav-cta" href="#cta">Get Started</a>
+                <a class="nav-cta" href="#pricing">Get Started</a>
             </div>
         </div>
     </nav>
