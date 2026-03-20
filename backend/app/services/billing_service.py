@@ -27,14 +27,14 @@ PLAN_CONFIG = {
         "resolution_price_id": os.getenv("STRIPE_BASE_RESOLUTION_PRICE_ID", "price_placeholder_base_res"),
         "revenue_share_price_id": os.getenv("STRIPE_BASE_REVENUE_SHARE_PRICE_ID", "price_placeholder_base_rev"),
         "per_resolution_usd": 50,           # $0.50
-        "revenue_share_pct": Decimal("0.02"),  # 2%
+        "revenue_share_pct": Decimal("0.01"),  # 1%
     },
     "elite": {
         "flat_price_id": os.getenv("STRIPE_ELITE_FLAT_PRICE_ID", "price_placeholder_elite_flat"),
         "resolution_price_id": os.getenv("STRIPE_ELITE_RESOLUTION_PRICE_ID", "price_placeholder_elite_res"),
         "revenue_share_price_id": os.getenv("STRIPE_ELITE_REVENUE_SHARE_PRICE_ID", "price_placeholder_elite_rev"),
         "per_resolution_usd": 100,          # $1.00
-        "revenue_share_pct": Decimal("0.05"),  # 5%
+        "revenue_share_pct": Decimal("0.01"),  # 1%
     },
 }
 
