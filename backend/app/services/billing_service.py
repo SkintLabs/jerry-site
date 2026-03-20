@@ -1,7 +1,7 @@
 """
 Jerry The Customer Service Bot — Stripe Billing Service
 Handles subscription creation and metered usage reporting.
-Currency: AUD. Uses Stripe Python SDK (sync calls wrapped in run_in_executor).
+Currency: USD. Uses Stripe Python SDK (sync calls wrapped in run_in_executor).
 """
 
 import asyncio
@@ -26,14 +26,14 @@ PLAN_CONFIG = {
         "flat_price_id": os.getenv("STRIPE_BASE_FLAT_PRICE_ID", "price_placeholder_base_flat"),
         "resolution_price_id": os.getenv("STRIPE_BASE_RESOLUTION_PRICE_ID", "price_placeholder_base_res"),
         "revenue_share_price_id": os.getenv("STRIPE_BASE_REVENUE_SHARE_PRICE_ID", "price_placeholder_base_rev"),
-        "per_resolution_aud": 50,           # $0.50
+        "per_resolution_usd": 50,           # $0.50
         "revenue_share_pct": Decimal("0.02"),  # 2%
     },
     "elite": {
         "flat_price_id": os.getenv("STRIPE_ELITE_FLAT_PRICE_ID", "price_placeholder_elite_flat"),
         "resolution_price_id": os.getenv("STRIPE_ELITE_RESOLUTION_PRICE_ID", "price_placeholder_elite_res"),
         "revenue_share_price_id": os.getenv("STRIPE_ELITE_REVENUE_SHARE_PRICE_ID", "price_placeholder_elite_rev"),
-        "per_resolution_aud": 100,          # $1.00
+        "per_resolution_usd": 100,          # $1.00
         "revenue_share_pct": Decimal("0.05"),  # 5%
     },
 }
@@ -102,7 +102,7 @@ class BillingService:
                         {"price": config["resolution_price_id"]},
                         {"price": config["revenue_share_price_id"]},
                     ],
-                    currency="aud",
+                    currency="usd",
                     payment_behavior="default_incomplete",
                     expand=["latest_invoice.payment_intent"],
                 ),
@@ -158,7 +158,7 @@ class BillingService:
             return False
 
     async def report_revenue_share(self, subscription_id: str, plan: str, order_value_cents: int) -> bool:
-        """Calculate commission in AUD cents and push to Stripe metered billing."""
+        """Calculate commission in USD cents and push to Stripe metered billing."""
         if not self.configured or not subscription_id:
             return False
 

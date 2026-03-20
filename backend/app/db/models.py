@@ -226,7 +226,7 @@ class AttributedSale(Base):
     )
     commission_cents: Mapped[int] = mapped_column(
         Integer, default=0,
-        comment="Pre-calculated commission in AUD cents for Stripe metered billing",
+        comment="Pre-calculated commission in USD cents for Stripe metered billing",
     )
     created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), nullable=False)
 
