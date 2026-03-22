@@ -80,7 +80,7 @@
             letter-spacing: 0.08em;
             padding: 4px 10px;
             border: 1px solid var(--border);
-            border-radius: 100px;
+            border-radius: 4px;
             transition: all 0.2s;
             text-decoration: none;
         }
@@ -94,7 +94,7 @@
         .nav-cta {
             background: var(--primary) !important; color: var(--text-bright) !important;
             -webkit-text-fill-color: var(--text-bright) !important;
-            padding: 8px 22px; border-radius: 100px; font-weight: 600; font-size: 0.85rem;
+            padding: 8px 22px; border-radius: 6px; font-weight: 600; font-size: 0.85rem;
             transition: all 0.2s; border: 1px solid var(--primary);
         }
         .nav-cta:hover { background: var(--primary-hover) !important; transform: translateY(-1px); }
@@ -132,25 +132,20 @@
         .hero-buttons { display: flex; gap: 16px; flex-wrap: wrap; }
         .btn-primary {
             background: var(--primary); color: var(--text-bright); padding: 16px 36px;
-            border-radius: 100px; font-weight: 700; font-size: 1rem; border: none;
+            border-radius: 6px; font-weight: 700; font-size: 1rem; border: none;
             cursor: pointer; transition: all 0.25s; display: inline-flex; align-items: center; gap: 8px;
             box-shadow: 0 4px 24px rgba(193,102,107,0.25);
+            text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.88rem;
         }
         .btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); color: var(--text-bright); box-shadow: 0 6px 32px rgba(193,102,107,0.35); }
         .btn-secondary {
             background: transparent; color: var(--warm-beige); padding: 16px 36px;
-            border-radius: 100px; font-weight: 600; font-size: 1rem;
+            border-radius: 6px; font-weight: 600; font-size: 0.88rem;
             border: 1px solid var(--chocolate); cursor: pointer; transition: all 0.25s;
             display: inline-flex; align-items: center; gap: 8px;
+            text-transform: uppercase; letter-spacing: 0.04em;
         }
         .btn-secondary:hover { border-color: var(--primary); color: var(--primary); background: rgba(193,102,107,0.06); }
-        .btn-demo {
-            background: transparent; color: var(--accent); padding: 16px 36px;
-            border-radius: 100px; font-weight: 600; font-size: 1rem;
-            border: 1px solid var(--accent); cursor: pointer; transition: all 0.25s;
-            display: inline-flex; align-items: center; gap: 8px;
-        }
-        .btn-demo:hover { border-color: var(--accent-hover); color: var(--accent-hover); background: rgba(212,160,64,0.06); }
 
         /* Mock chat widget in hero */
         .hero-chat {
@@ -212,7 +207,7 @@
             width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 0.9rem;
         }
 
-        /* ── STATS STRIP — horizontal inline (distinct from WonderwallAi card grid) ── */
+        /* ── STATS STRIP ── */
         .page-wrap {
             width: 100%; max-width: 100vw; overflow-x: hidden;
         }
@@ -223,20 +218,26 @@
             overflow: hidden;
         }
         .stats-inner {
-            display: flex; justify-content: center; align-items: center;
-            gap: 0; padding: 28px 0; flex-wrap: wrap;
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 0; padding: 0;
         }
         .stat-block {
-            display: flex; align-items: center; gap: 12px; padding: 0 36px;
-            border-right: 1px solid var(--border);
+            padding: 32px 24px; text-align: center; position: relative;
         }
-        .stat-block:last-child { border-right: none; }
+        .stat-block::after {
+            content: ''; position: absolute; right: 0; top: 20%; height: 60%;
+            width: 1px; background: var(--border);
+        }
+        .stat-block:last-child::after { display: none; }
         .stat-num {
             font-family: 'Noto Serif', Georgia, serif;
-            font-size: 1.8rem; font-weight: 900; color: var(--accent);
+            font-size: 2.4rem; font-weight: 900; color: var(--accent);
+            line-height: 1; margin-bottom: 6px;
         }
-        .stat-text { font-size: 0.82rem; color: var(--text-muted); line-height: 1.3; }
-        .stat-text strong { display: block; color: var(--text-secondary); font-weight: 600; }
+        .stat-label {
+            font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;
+            letter-spacing: 0.12em; font-weight: 600;
+        }
 
         /* ── SECTIONS ── */
         section { padding: 100px 0; }
@@ -260,10 +261,10 @@
         .capability:last-child { border-bottom: none; }
         .capability.reverse .cap-visual { order: -1; }
         .cap-content .cap-tag {
-            display: inline-block; font-size: 0.72rem; text-transform: uppercase;
-            letter-spacing: 0.12em; font-weight: 700; color: var(--accent);
-            background: rgba(212,160,64,0.1); border: 1px solid rgba(212,160,64,0.2);
-            padding: 4px 12px; border-radius: 100px; margin-bottom: 16px;
+            display: inline-block; font-size: 0.68rem; text-transform: uppercase;
+            letter-spacing: 0.15em; font-weight: 700; color: var(--accent);
+            background: none; border: none;
+            padding: 0 0 0 12px; border-left: 3px solid var(--accent); margin-bottom: 16px;
         }
         .cap-content h3 {
             font-size: 1.6rem; font-weight: 900; margin-bottom: 12px; line-height: 1.2;
@@ -388,8 +389,8 @@
         .price-card.featured::before {
             content: 'Most Popular'; position: absolute; top: -12px; left: 50%;
             transform: translateX(-50%); background: var(--gradient-warm);
-            color: #000; font-size: 0.75rem; font-weight: 700;
-            padding: 4px 16px; border-radius: 100px;
+            color: #000; font-size: 0.7rem; font-weight: 700;
+            padding: 4px 16px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.06em;
         }
         .price-name { font-family: 'Noto Serif', Georgia, serif; font-size: 1.3rem; font-weight: 700; margin-bottom: 4px; }
         .price-desc { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px; }
@@ -408,8 +409,9 @@
         .price-features .check { color: var(--accent); }
         .btn-price {
             display: block; width: 100%; text-align: center; padding: 14px;
-            border-radius: 100px; font-weight: 700; font-size: 0.95rem;
+            border-radius: 6px; font-weight: 700; font-size: 0.88rem;
             cursor: pointer; transition: all 0.25s;
+            text-transform: uppercase; letter-spacing: 0.04em;
         }
         .btn-price-primary {
             background: var(--primary); color: var(--text-bright); border: none;
@@ -470,9 +472,11 @@
             .nav-cta { padding: 6px 16px; font-size: 0.78rem; }
             .logo { font-size: 1.1rem; }
             .logo .logo-sub { font-size: 0.6em; }
-            .stats-inner { flex-direction: column; gap: 0; }
-            .stat-block { border-right: none; border-bottom: 1px solid var(--border); padding: 14px 0; width: 100%; justify-content: center; }
-            .stat-block:last-child { border-bottom: none; }
+            .stats-inner { grid-template-columns: repeat(2, 1fr); }
+            .stat-block { padding: 20px 16px; }
+            .stat-block::after { display: none; }
+            .stat-block { border-bottom: 1px solid var(--border); }
+            .stat-num { font-size: 1.8rem; }
             .pricing-grid { grid-template-columns: 1fr; max-width: 100%; }
             .price-card { padding: 28px 20px; }
             .footer-content { flex-direction: column; text-align: center; }
@@ -519,9 +523,7 @@
                         handles returns, speaks 50+ languages, and never takes a day off.
                     </p>
                     <div class="hero-buttons">
-                        <a class="btn-primary" href="https://sunsetbot-production.up.railway.app/static/demo.html" target="_blank" rel="noopener">Try Jerry The Customer Service Bot Free &rarr;</a>
-                        <a class="btn-demo" href="https://sunsetbot-production.up.railway.app/static/demo.html" target="_blank" rel="noopener">Try Live Demo &rarr;</a>
-                        <a class="btn-secondary" href="#capabilities">See Capabilities</a>
+                        <a class="btn-primary" href="https://sunsetbot-production.up.railway.app/static/demo.html" target="_blank" rel="noopener">Try Free Demo &rarr;</a>
                     </div>
                 </div>
                 <div class="hero-chat">
@@ -552,41 +554,30 @@
         </div>
     </section>
 
-    <!-- STATS STRIP — horizontal with dividers -->
+    <!-- STATS -->
     <div class="stats-strip">
         <div class="container">
             <div class="stats-inner fade-in">
                 <div class="stat-block">
                     <div class="stat-num">&lt;2s</div>
-                    <div class="stat-text"><strong>Response Time</strong>AI-powered instant replies</div>
+                    <div class="stat-label">Response Time</div>
                 </div>
                 <div class="stat-block">
                     <div class="stat-num">24/7</div>
-                    <div class="stat-text"><strong>Always Available</strong>Never misses a customer</div>
+                    <div class="stat-label">Always On</div>
                 </div>
                 <div class="stat-block">
                     <div class="stat-num">50+</div>
-                    <div class="stat-text"><strong>Languages</strong>Speak to any customer</div>
+                    <div class="stat-label">Languages</div>
                 </div>
                 <div class="stat-block">
                     <div class="stat-num">100%</div>
-                    <div class="stat-text"><strong>Shopify Integrated</strong>Products, orders, refunds</div>
+                    <div class="stat-label">Shopify Native</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- SEE IT IN ACTION -->
-    <section style="padding: 60px 0; text-align: center;">
-        <div class="container fade-in">
-            <div class="section-label">Live Demo</div>
-            <h2>See Jerry The Customer Service Bot <span class="gradient-text">in action</span></h2>
-            <p class="section-desc" style="margin: 0 auto 32px; text-align: center;">
-                Try the real AI chat widget on a demo store. Ask about products, track orders, or test returns — Jerry The Customer Service Bot handles it all live.
-            </p>
-            <a class="btn-primary" href="https://sunsetbot-production.up.railway.app/static/demo.html" target="_blank" rel="noopener">Try Live Demo &rarr;</a>
-        </div>
-    </section>
 
     <!-- CAPABILITIES — detailed alternating rows -->
     <section id="capabilities">
@@ -950,15 +941,11 @@
     <!-- CTA -->
     <section class="cta-section" id="cta">
         <div class="container fade-in">
-            <div class="section-label">Ready?</div>
             <h2>Put Jerry The Customer Service Bot <span class="gradient-text">to work</span></h2>
             <p class="section-desc" style="margin: 0 auto 40px; text-align: center;">
                 Jerry The Customer Service Bot handles the support. You focus on growing your business.
             </p>
-            <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
-                <a class="btn-primary" href="https://sunsetbot-production.up.railway.app/static/demo.html" target="_blank" rel="noopener">Try Live Demo &rarr;</a>
-                <a class="btn-secondary" href="#pricing">See Pricing</a>
-            </div>
+            <a class="btn-primary" href="#pricing">Get Started &rarr;</a>
         </div>
     </section>
 
