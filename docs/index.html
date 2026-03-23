@@ -417,6 +417,60 @@
         }
         .btn-price-secondary:hover { border-color: var(--primary); color: var(--primary); }
 
+        /* ── EARLY BIRD ── */
+        .early-bird-banner {
+            background: linear-gradient(135deg, rgba(212,160,64,0.08), rgba(193,102,107,0.08));
+            border: 1px solid var(--accent);
+            border-radius: 12px;
+            padding: 20px 28px;
+            margin-bottom: 32px;
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .early-bird-inner {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .early-bird-icon { font-size: 2rem; }
+        .early-bird-text { text-align: left; }
+        .early-bird-text strong { color: var(--accent); font-size: 1.1rem; display: block; }
+        .early-bird-text span { color: var(--text-secondary); font-size: 0.9rem; }
+        .early-bird-counter { text-align: center; min-width: 80px; }
+        .early-bird-count {
+            font-family: 'Noto Serif', Georgia, serif;
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--accent);
+            display: block;
+            line-height: 1;
+        }
+        .early-bird-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
+        .price-original {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            text-decoration: line-through;
+            display: none;
+        }
+        .price-discounted { display: none; }
+        .eb-badge {
+            position: absolute;
+            top: -12px;
+            right: 16px;
+            background: var(--accent);
+            color: #000;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            display: none;
+        }
+
         /* ── CTA ── */
         .cta-section {
             text-align: center; padding: 120px 0; position: relative;
@@ -894,11 +948,29 @@
             <div class="section-label">Pricing</div>
             <h2>Simple, transparent <span class="gradient-text">pricing</span></h2>
             <p class="section-desc" style="margin: 0 auto;">Flat monthly rate. $0.25 per AI resolution. No hidden fees. No revenue share. Jerry costs less than a single support ticket at most competitors.</p>
+
+            <!-- Early Bird Banner -->
+            <div id="early-bird-banner" class="early-bird-banner fade-in" style="margin-top: 32px;">
+                <div class="early-bird-inner">
+                    <span class="early-bird-icon">&#127820;</span>
+                    <div class="early-bird-text">
+                        <strong>Early Bird: 50% off forever</strong>
+                        <span>Lock in half-price for life. Limited to the first 150 customers.</span>
+                    </div>
+                    <div class="early-bird-counter">
+                        <span id="early-bird-remaining" class="early-bird-count">150</span>
+                        <span class="early-bird-label">spots left</span>
+                    </div>
+                </div>
+            </div>
+
             <div class="pricing-grid fade-in">
-                <div class="price-card">
+                <div class="price-card" data-plan="starter">
+                    <span class="eb-badge">50% OFF</span>
                     <div class="price-name">Starter</div>
                     <div class="price-desc">For growing Shopify stores</div>
-                    <div class="price-amount">$49 <span>USD/mo</span></div>
+                    <div class="price-original">$49/mo</div>
+                    <div class="price-amount"><span class="price-full">$49</span><span class="price-discounted">$24.50</span> <span>USD/mo</span></div>
                     <div class="price-period">+ $0.25/resolution</div>
                     <ul class="price-features">
                         <li><span class="check">&#10003;</span> 500 conversations/month</li>
@@ -909,10 +981,12 @@
                     </ul>
                     <a class="btn-price btn-price-secondary" href="https://sunsetbot-production.up.railway.app/billing/checkout?plan=starter">Get Started</a>
                 </div>
-                <div class="price-card featured">
+                <div class="price-card featured" data-plan="growth">
+                    <span class="eb-badge">50% OFF</span>
                     <div class="price-name">Growth</div>
                     <div class="price-desc">For scaling stores</div>
-                    <div class="price-amount">$149 <span>USD/mo</span></div>
+                    <div class="price-original">$149/mo</div>
+                    <div class="price-amount"><span class="price-full">$149</span><span class="price-discounted">$74.50</span> <span>USD/mo</span></div>
                     <div class="price-period">+ $0.25/resolution</div>
                     <ul class="price-features">
                         <li><span class="check">&#10003;</span> Unlimited conversations</li>
@@ -923,10 +997,12 @@
                     </ul>
                     <a class="btn-price btn-price-primary" href="https://sunsetbot-production.up.railway.app/billing/checkout?plan=growth">Get Started</a>
                 </div>
-                <div class="price-card">
+                <div class="price-card" data-plan="scale">
+                    <span class="eb-badge">50% OFF</span>
                     <div class="price-name">Scale</div>
                     <div class="price-desc">For high-volume stores</div>
-                    <div class="price-amount">$499 <span>USD/mo</span></div>
+                    <div class="price-original">$499/mo</div>
+                    <div class="price-amount"><span class="price-full">$499</span><span class="price-discounted">$249.50</span> <span>USD/mo</span></div>
                     <div class="price-period">+ $0.25/resolution</div>
                     <ul class="price-features">
                         <li><span class="check">&#10003;</span> Everything in Growth</li>
@@ -983,6 +1059,20 @@
             });
         }, { threshold: 0.1 });
         document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+        // Early bird pricing — show discounted prices on all paid cards
+        (function() {
+            document.querySelectorAll('.price-card[data-plan]').forEach(function(card) {
+                var badge = card.querySelector('.eb-badge');
+                var original = card.querySelector('.price-original');
+                var full = card.querySelector('.price-full');
+                var discounted = card.querySelector('.price-discounted');
+                if (badge) badge.style.display = 'block';
+                if (original) original.style.display = 'block';
+                if (full) full.style.display = 'none';
+                if (discounted) discounted.style.display = 'inline';
+            });
+        })();
     </script>
 </body>
 </html>
