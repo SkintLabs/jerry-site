@@ -159,7 +159,7 @@ Chat message flow:
 - **Distribution:** Custom (install link via Partner dashboard)
 - **Webhooks:** products/create, products/update, products/delete, orders/create, refunds/create, app/uninstalled
 - **Railway:** sunsetbot-production.up.railway.app (PostgreSQL attached)
-- **GitHub:** Buddafest/sunsetbot
+- **GitHub:** SkintLabs/Jerry
 
 ## Pending Manual Steps
 

@@ -162,5 +162,5 @@ git push origin main
 
 ---
 
-**GitHub:** [Buddafest/sunsetbot](https://github.com/Buddafest/sunsetbot)
+**GitHub:** [SkintLabs/Jerry](https://github.com/SkintLabs/Jerry)
 **Landing Page:** [GitHub Pages](https://buddafest.github.io/sunsetbot/)

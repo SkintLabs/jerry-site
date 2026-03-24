@@ -3,7 +3,7 @@
 ## Links
 - **Live demo:** https://sunsetbot-production.up.railway.app/static/demo.html
 - **Landing page:** https://buddafest.github.io/sunsetbot/
-- **GitHub:** https://github.com/Buddafest/sunsetbot
+- **GitHub:** https://github.com/SkintLabs/Jerry
 - **WonderwallAi:** https://buddafest.github.io/wonderwallai/
 
 ---
