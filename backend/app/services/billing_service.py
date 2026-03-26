@@ -22,26 +22,35 @@ except ImportError:
 
 
 def get_plan_config() -> dict:
-    """Build plan config at runtime so Railway env vars are read correctly."""
+    """Build plan config at runtime so Railway env vars are read correctly.
+
+    Railway env vars use: STRIPE_BASE_, STRIPE_GROWTH_, STRIPE_ELITE_
+    Landing page sends: starter, growth, scale
+    Aliases: starter → base, scale → elite
+    metered_price_id is optional — checkout works with flat fee only.
+    """
+    base = {
+        "flat_price_id": os.getenv("STRIPE_BASE_FLAT_PRICE_ID", ""),
+        "metered_price_id": os.getenv("STRIPE_BASE_METERED_PRICE_ID", ""),
+        "per_resolution_usd": 25,  # $0.25
+    }
+    growth = {
+        "flat_price_id": os.getenv("STRIPE_GROWTH_FLAT_PRICE_ID", ""),
+        "metered_price_id": os.getenv("STRIPE_GROWTH_METERED_PRICE_ID", ""),
+        "per_resolution_usd": 25,
+    }
+    elite = {
+        "flat_price_id": os.getenv("STRIPE_ELITE_FLAT_PRICE_ID", ""),
+        "metered_price_id": os.getenv("STRIPE_ELITE_METERED_PRICE_ID", ""),
+        "per_resolution_usd": 25,
+    }
     return {
-        # Base: $49/mo USD flat + $0.25/resolution
-        "base": {
-            "flat_price_id": os.getenv("STRIPE_BASE_FLAT_PRICE_ID", "price_placeholder_base_flat"),
-            "metered_price_id": os.getenv("STRIPE_BASE_METERED_PRICE_ID", "price_placeholder_base_metered"),
-            "per_resolution_usd": 25,           # $0.25
-        },
-        # Growth: $149/mo USD flat + $0.25/resolution
-        "growth": {
-            "flat_price_id": os.getenv("STRIPE_GROWTH_FLAT_PRICE_ID", "price_placeholder_growth_flat"),
-            "metered_price_id": os.getenv("STRIPE_GROWTH_METERED_PRICE_ID", "price_placeholder_growth_metered"),
-            "per_resolution_usd": 25,           # $0.25
-        },
-        # Elite: $499/mo USD flat + $0.25/resolution
-        "elite": {
-            "flat_price_id": os.getenv("STRIPE_ELITE_FLAT_PRICE_ID", "price_placeholder_elite_flat"),
-            "metered_price_id": os.getenv("STRIPE_ELITE_METERED_PRICE_ID", "price_placeholder_elite_metered"),
-            "per_resolution_usd": 25,           # $0.25
-        },
+        "base": base,
+        "growth": growth,
+        "elite": elite,
+        # Landing page aliases
+        "starter": base,
+        "scale": elite,
     }
 
 
@@ -101,16 +110,20 @@ class BillingService:
             logger.error(f"Unknown plan: {plan}")
             return None
 
+        flat_id = config.get("flat_price_id", "")
+        metered_id = config.get("metered_price_id", "")
+
+        items = [{"price": flat_id}]
+        if metered_id and not metered_id.startswith("price_placeholder"):
+            items.append({"price": metered_id})
+
         loop = asyncio.get_running_loop()
         try:
             subscription = await loop.run_in_executor(
                 None,
                 lambda: stripe.Subscription.create(
                     customer=customer_id,
-                    items=[
-                        {"price": config["flat_price_id"]},
-                        {"price": config["metered_price_id"]},
-                    ],
+                    items=items,
                     currency="usd",
                     payment_behavior="default_incomplete",
                     expand=["latest_invoice.payment_intent"],

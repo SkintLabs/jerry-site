@@ -99,16 +99,27 @@ async def checkout(plan: str = "base"):
     plan_config = get_plan_config()
     config = plan_config.get(plan)
     if not config:
-        valid_plans = ", ".join(plan_config.keys())
+        valid_plans = ", ".join(k for k in plan_config.keys() if k not in ("base", "elite"))
         raise HTTPException(status_code=400, detail=f"Invalid plan '{plan}'. Valid plans: {valid_plans}.")
+
+    flat_id = config.get("flat_price_id", "")
+    metered_id = config.get("metered_price_id", "")
+
+    if not flat_id or flat_id.startswith("price_placeholder"):
+        logger.error(f"Flat price not configured for plan '{plan}': {flat_id!r}")
+        raise HTTPException(status_code=503, detail="Billing not fully configured for this plan. Please try again later.")
+
+    # Build line items — flat fee is required, metered resolution is optional
+    line_items = [{"price": flat_id, "quantity": 1}]
+    if metered_id and not metered_id.startswith("price_placeholder"):
+        line_items.append({"price": metered_id})
+    else:
+        logger.info(f"Metered price not configured for plan '{plan}' — checkout will use flat fee only")
 
     try:
         session = stripe_mod.checkout.Session.create(
             mode="subscription",
-            line_items=[
-                {"price": config["flat_price_id"], "quantity": 1},
-                {"price": config["metered_price_id"]},
-            ],
+            line_items=line_items,
             success_url="https://jerry.skintlabs.ai/?checkout=success",
             cancel_url="https://jerry.skintlabs.ai/#pricing",
             allow_promotion_codes=True,
