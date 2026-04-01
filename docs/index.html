@@ -172,13 +172,14 @@
             display: flex; align-items: center; gap: 12px;
         }
         .chat-avatar {
-            width: 36px; height: 36px; border-radius: 50%;
-            background: rgba(255,255,255,0.2);
+            width: 36px; height: 36px; border-radius: 10px;
+            background: rgba(255,255,255,0.1);
             display: flex; align-items: center; justify-content: center;
-            font-size: 1rem;
-            font-weight: 700;
-            font-family: 'Noto Serif', Georgia, serif;
-            color: var(--text-bright);
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .chat-avatar img {
+            width: 100%; height: 100%; object-fit: cover; display: block;
         }
         .chat-header-text { color: var(--text-bright); }
         .chat-header-text strong { display: block; font-size: 0.95rem; }
@@ -589,7 +590,7 @@
                 </div>
                 <div class="hero-chat">
                     <div class="chat-header">
-                        <div class="chat-avatar">J</div>
+                        <div class="chat-avatar"><img src="https://skintlabs.ai/assets/jerry-app-icon.png" alt="Jerry"></div>
                         <div class="chat-header-text">
                             <strong>Jerry The Customer Service Bot</strong>
                             <span>Online &middot; Typically replies instantly</span>
