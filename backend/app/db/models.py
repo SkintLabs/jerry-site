@@ -99,19 +99,31 @@ class Store(Base):
         Text, nullable=True,
         comment="Custom welcome message (overrides default)",
     )
+    chat_language: Mapped[str] = mapped_column(
+        String(10), default="en-US",
+        comment="Language for voice input/output (e.g. en-US, es-ES)",
+    )
 
-    # --- Stripe / Billing ---
+    # --- Billing ---
     stripe_customer_id: Mapped[Optional[str]] = mapped_column(
         String(255), nullable=True,
-        comment="Stripe Customer ID (cus_xxx)",
+        comment="Stripe Customer ID (cus_xxx) — legacy, kept for migration",
     )
     stripe_subscription_id: Mapped[Optional[str]] = mapped_column(
         String(255), nullable=True,
-        comment="Stripe Subscription ID (sub_xxx)",
+        comment="Stripe Subscription ID (sub_xxx) — legacy, kept for migration",
+    )
+    shopify_subscription_id: Mapped[Optional[str]] = mapped_column(
+        String(255), nullable=True,
+        comment="Shopify AppSubscription GID (gid://shopify/AppSubscription/xxx)",
+    )
+    shopify_plan: Mapped[Optional[str]] = mapped_column(
+        String(50), nullable=True,
+        comment="Shopify billing plan: base | growth | elite",
     )
     jerry_plan: Mapped[str] = mapped_column(
         String(32), default="base",
-        comment="Billing plan: base | elite",
+        comment="Billing plan: base | growth | elite",
     )
     monthly_interaction_limit: Mapped[int] = mapped_column(
         Integer, default=500,
@@ -127,7 +139,7 @@ class Store(Base):
     )
     subscription_status: Mapped[str] = mapped_column(
         String(32), default="none",
-        comment="Stripe status: none | trialing | active | past_due | canceled | incomplete",
+        comment="Status: none | trialing | active | past_due | canceled | incomplete",
     )
 
     # --- Sync state ---
@@ -249,5 +261,19 @@ class ChatInteraction(Base):
     products_shown: Mapped[int] = mapped_column(Integer, default=0)
     escalated: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now())
+
+    # --- Observability fields (added for intent logging) ---
+    turn_number: Mapped[int] = mapped_column(
+        Integer, default=0,
+        comment="Turn number within the conversation session",
+    )
+    latency_ms: Mapped[Optional[float]] = mapped_column(
+        Float, nullable=True,
+        comment="End-to-end pipeline latency for this message in milliseconds",
+    )
+    firewall_verdict: Mapped[Optional[str]] = mapped_column(
+        String(32), nullable=True,
+        comment="Firewall outcome: allowed | blocked_inbound | blocked_outbound | redacted",
+    )
 
 

@@ -13,7 +13,7 @@ from typing import Optional
 from sqlalchemy import select
 
 from app.db.engine import get_db
-from app.db.models import Store, ChatSession, SupportResolution, AttributedSale
+from app.db.models import Store, ChatSession, SupportResolution, AttributedSale, ChatInteraction
 
 logger = logging.getLogger("jerry.analytics")
 
@@ -36,8 +36,11 @@ class AnalyticsService:
         entities: dict,
         products_shown: int,
         escalated: bool,
+        turn_number: int = 0,
+        latency_ms: Optional[float] = None,
+        firewall_verdict: Optional[str] = None,
     ) -> None:
-        """Called after every message. Now also logs full interaction details."""
+        """Called after every message. Persists full interaction details for auditability."""
         try:
             async with get_db() as db:
                 store = await self._get_store(db, store_id)
@@ -45,15 +48,28 @@ class AnalyticsService:
                     return
 
                 session = await self._get_or_create_session(db, store, session_id, escalated)
+                await db.flush()  # Ensure session.id is available
 
-                # TODO: once you add ChatInteraction model, insert here:
-                # interaction = ChatInteraction(...)
-                # db.add(interaction)
+                # Persist full interaction — the audit trail
+                interaction = ChatInteraction(
+                    session_id=session.id,
+                    message=message[:500],           # truncate for privacy/storage
+                    response_text=response_text[:500] if response_text else None,
+                    intent=intent,
+                    entities=entities,
+                    products_shown=products_shown,
+                    escalated=escalated,
+                    turn_number=turn_number,
+                    latency_ms=latency_ms,
+                    firewall_verdict=firewall_verdict,
+                )
+                db.add(interaction)
 
                 await db.commit()
 
                 logger.info(
                     f"Session tracked | store={store_id} | session={session_id} | "
+                    f"turn={turn_number} | intent={intent} | "
                     f"usage={store.current_month_usage}/{store.monthly_interaction_limit} | escalated={escalated}"
                 )
 
@@ -79,12 +95,14 @@ class AnalyticsService:
 
                 await db.commit()
 
-            # Fire-and-forget Stripe (safe after commit)
-            if self.billing_service and getattr(store, "stripe_subscription_id", None):
+            # Fire-and-forget Shopify usage billing (safe after commit)
+            if (
+                self.billing_service
+                and getattr(store, "shopify_subscription_id", None)
+                and getattr(store, "subscription_status", "none") in ("active", "trialing")
+            ):
                 asyncio.create_task(
-                    self.billing_service.report_resolution(
-                        store.stripe_subscription_id, store.jerry_plan
-                    )
+                    self._report_shopify_usage(store, resolution_type)
                 )
 
             logger.info(f"Resolution recorded | store={store_id} | type={resolution_type}")
@@ -108,8 +126,8 @@ class AnalyticsService:
                 if existing.scalar_one_or_none():
                     return
 
-                plan_config = {"base": Decimal("0"), "growth": Decimal("0"), "elite": Decimal("0")}
-                pct = plan_config.get(store.jerry_plan, Decimal("0"))
+                plan_config = {"base": Decimal("0.02"), "growth": Decimal("0.03"), "elite": Decimal("0.05")}
+                pct = plan_config.get(store.jerry_plan, Decimal("0.02"))
                 order_cents = int(order_value * 100)
                 commission = int(order_cents * pct)
 
@@ -122,13 +140,6 @@ class AnalyticsService:
                 db.add(sale)
                 await db.commit()
 
-            if self.billing_service and getattr(store, "stripe_subscription_id", None):
-                asyncio.create_task(
-                    self.billing_service.report_revenue_share(
-                        store.stripe_subscription_id, store.jerry_plan, order_cents
-                    )
-                )
-
             logger.info(
                 f"Sale attributed | shop={shop_domain} | order={shopify_order_id} | "
                 f"value=${order_value} | commission={commission}¢"
@@ -136,6 +147,26 @@ class AnalyticsService:
 
         except Exception as e:
             logger.error(f"Sale attribution failed: {e}", exc_info=True)
+
+    async def _report_shopify_usage(self, store, resolution_type: str) -> None:
+        """Report a $0.25 usage charge to Shopify for a resolved interaction."""
+        try:
+            usage_line_item_id = await self.billing_service.get_usage_line_item_id(
+                shop_domain=store.shopify_domain,
+                access_token=store.access_token,
+            )
+            if not usage_line_item_id:
+                logger.warning(f"No usage line item found for {store.shopify_domain} — skipping usage billing")
+                return
+
+            await self.billing_service.report_resolution(
+                shop_domain=store.shopify_domain,
+                access_token=store.access_token,
+                subscription_line_item_id=usage_line_item_id,
+                description=f"AI resolution: {resolution_type}",
+            )
+        except Exception as e:
+            logger.error(f"Shopify usage billing failed for {store.shopify_domain}: {e}")
 
     # Private helpers for cleanliness & reuse
     async def _get_store(self, db, store_id: str):

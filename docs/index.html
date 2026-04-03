@@ -172,14 +172,10 @@
             display: flex; align-items: center; gap: 12px;
         }
         .chat-avatar {
-            width: 36px; height: 36px; border-radius: 10px;
-            background: rgba(255,255,255,0.1);
+            width: 36px; height: 36px; border-radius: 50%;
+            background: rgba(255,255,255,0.2);
             display: flex; align-items: center; justify-content: center;
-            overflow: hidden;
-            flex-shrink: 0;
-        }
-        .chat-avatar img {
-            width: 100%; height: 100%; object-fit: cover; display: block;
+            font-size: 1.1rem;
         }
         .chat-header-text { color: var(--text-bright); }
         .chat-header-text strong { display: block; font-size: 0.95rem; }
@@ -402,7 +398,7 @@
         .price-desc { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px; }
         .price-amount {
             font-family: 'Noto Serif', Georgia, serif;
-            font-size: 2.8rem; font-weight: 900; color: var(--accent);
+            font-size: 3.2rem; font-weight: 900; color: #ffffff;
         }
         .price-amount span { font-size: 1rem; color: var(--text-muted); font-weight: 400; }
         .price-period { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 24px; }
@@ -462,12 +458,12 @@
         }
         .early-bird-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
         .price-original {
-            font-size: 1.2rem;
+            font-size: 1.4rem;
             color: var(--text-muted);
             text-decoration: line-through;
             display: none;
         }
-        .price-discounted { display: none; }
+        .price-discounted { display: none; font-size: 3.2rem; font-weight: 900; color: #ffffff; }
         .eb-badge {
             position: absolute;
             top: -12px;
@@ -529,7 +525,6 @@
             h2 { font-size: 1.8rem; }
         }
         @media (max-width: 768px) {
-            .logo .logo-sub { display: none; }
             .nav-links a:not(.nav-cta) { display: none; }
             .nav-cta { padding: 6px 16px; font-size: 0.78rem; }
             .logo { font-size: 1.1rem; }
@@ -560,7 +555,7 @@
                 <div class="logo">
                     <span class="logo-jerry">Jerry</span> <span class="logo-sub">The Customer Service Bot</span>
                 </div>
-                <a href="https://skintlabs.ai" class="skint-badge" target="_blank" rel="noopener">by Skint Labs</a>
+                <a href="https://skintlabs.ai" target="_blank" rel="noopener"><img src="assets/headers/SkintLabs_PAC_space_transparent_colored.png" alt="Skint Labs" style="height: 28px; width: auto;"></a>
             </div>
             <div class="nav-links">
                 <a href="#capabilities">Capabilities</a>
@@ -590,7 +585,7 @@
                 </div>
                 <div class="hero-chat">
                     <div class="chat-header">
-                        <div class="chat-avatar"><img src="https://skintlabs.ai/assets/jerry-app-icon.png" alt="Jerry"></div>
+                        <div class="chat-avatar">&#129302;</div>
                         <div class="chat-header-text">
                             <strong>Jerry The Customer Service Bot</strong>
                             <span>Online &middot; Typically replies instantly</span>
@@ -754,7 +749,7 @@
                         <span class="user">"&iquest;Tienen vestidos rojos?"</span><br><br>
                         <span class="label">Jerry The Customer Service Bot:</span><br>
                         <span class="bot">"&iexcl;S&iacute;! Tenemos 3 vestidos rojos disponibles. El m&aacute;s popular es el Sunset Wrap Dress a $54.99. &iquest;Te gustar&iacute;a ver los detalles?"</span><br><br>
-                        <span class="label" style="color: var(--text-muted); font-style: italic;">Voice input detected &middot; responding in Spanish</span>
+                        <span class="label" style="color: var(--text-muted); font-style: italic;">&#127908; Voice input detected &middot; responding in Spanish</span>
                     </div>
                 </div>
             </div>
@@ -839,7 +834,7 @@
             </div>
             <div class="features-columns fade-in">
                 <div class="feature-group">
-                    <h3>AI Intelligence</h3>
+                    <h3><span class="fg-icon">&#128269;</span> AI Intelligence</h3>
                     <ul>
                         <li><span class="check">&#10003;</span> Semantic product search (not keyword-based)</li>
                         <li><span class="check">&#10003;</span> Natural language understanding</li>
@@ -852,7 +847,7 @@
                     </ul>
                 </div>
                 <div class="feature-group">
-                    <h3>Shopify Integration</h3>
+                    <h3><span class="fg-icon">&#128722;</span> Shopify Integration</h3>
                     <ul>
                         <li><span class="check">&#10003;</span> One-click OAuth install</li>
                         <li><span class="check">&#10003;</span> Full product catalog sync</li>
@@ -865,7 +860,7 @@
                     </ul>
                 </div>
                 <div class="feature-group">
-                    <h3>Platform &amp; Security</h3>
+                    <h3><span class="fg-icon">&#128737;</span> Platform &amp; Security</h3>
                     <ul>
                         <li><span class="check">&#10003;</span> WonderwallAi prompt injection firewall</li>
                         <li><span class="check">&#10003;</span> Data leak prevention (PII, API keys)</li>
@@ -922,28 +917,28 @@
             </p>
             <div class="security-grid fade-in">
                 <div class="security-item">
-                    <div class="security-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 2L4 6v5c0 4.4 2.9 8.5 7 9.9 4.1-1.4 7-5.5 7-9.9V6L11 2z" stroke="#c1666b" stroke-width="1.6" fill="none" stroke-linejoin="round"/></svg></div>
+                    <div class="security-icon">&#128737;</div>
                     <div>
                         <strong>Prompt Injection Defence</strong>
                         <span>4-layer WonderwallAi pipeline blocks jailbreak attempts in under 2ms. Semantic routing, LLM sentinel, and canary tokens working together.</span>
                     </div>
                 </div>
                 <div class="security-item">
-                    <div class="security-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="5" y="10" width="12" height="9" rx="2" stroke="#c1666b" stroke-width="1.6" fill="none"/><path d="M8 10V7a3 3 0 0 1 6 0v3" stroke="#c1666b" stroke-width="1.6" stroke-linecap="round" fill="none"/><circle cx="11" cy="14.5" r="1.2" fill="#c1666b"/></svg></div>
+                    <div class="security-icon">&#128274;</div>
                     <div>
                         <strong>Data Leak Prevention</strong>
                         <span>API keys, PII, credentials, and sensitive data are caught and redacted before they ever leave Jerry The Customer Service Bot's response pipeline.</span>
                     </div>
                 </div>
                 <div class="security-item">
-                    <div class="security-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="#c1666b" stroke-width="1.6" fill="none"/><circle cx="11" cy="11" r="3" stroke="#c1666b" stroke-width="1.6" fill="none"/><line x1="11" y1="3" x2="11" y2="6" stroke="#c1666b" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+                    
                     <div>
                         <strong>Topic Enforcement</strong>
                         <span>Jerry The Customer Service Bot stays on-topic. E-commerce topics only — no one can abuse it as a general-purpose AI or extract system prompts.</span>
                     </div>
                 </div>
                 <div class="security-item">
-                    <div class="security-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="9" r="4" stroke="#c1666b" stroke-width="1.6" fill="none"/><path d="M11 13v2m0 0v2m0-2h-2m2 0h2" stroke="#c1666b" stroke-width="1.6" stroke-linecap="round"/><path d="M3 20c0-3.3 3.6-6 8-6s8 2.7 8 6" stroke="#c1666b" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg></div>
+                    <div class="security-icon">&#128272;</div>
                     <div>
                         <strong>JWT Authentication</strong>
                         <span>Every WebSocket connection is authenticated with a signed JWT. Rate limiting, IP limits, and input sanitisation protect against abuse.</span>
@@ -966,7 +961,7 @@
             <!-- Early Bird Banner -->
             <div id="early-bird-banner" class="early-bird-banner fade-in" style="margin-top: 32px;">
                 <div class="early-bird-inner">
-                    <span class="early-bird-icon">★</span>
+                    
                     <div class="early-bird-text">
                         <strong>Early Bird: 50% off forever</strong>
                         <span>Lock in half-price for life. Limited to the first 136 customers.</span>
@@ -981,7 +976,7 @@
             <div class="pricing-grid fade-in">
                 <div class="price-card" data-plan="starter">
                     <span class="eb-badge">50% OFF</span>
-                    <div class="price-name">Base</div>
+                    <div class="price-name">Starter</div>
                     <div class="price-desc">For growing Shopify stores</div>
                     <div class="price-original">$49/mo</div>
                     <div class="price-amount"><span class="price-full">$49</span><span class="price-discounted">$24.50</span> <span>USD/mo</span></div>
@@ -1004,7 +999,7 @@
                     <div class="price-period">+ $0.25/resolution</div>
                     <ul class="price-features">
                         <li><span class="check">&#10003;</span> Unlimited conversations</li>
-                        <li><span class="check">&#10003;</span> Everything in Base</li>
+                        <li><span class="check">&#10003;</span> Everything in Starter</li>
                         <li><span class="check">&#10003;</span> Revenue attribution dashboard</li>
                         <li><span class="check">&#10003;</span> Priority support</li>
                         <li><span class="check">&#10003;</span> Custom brand voice training</li>
@@ -1013,7 +1008,7 @@
                 </div>
                 <div class="price-card" data-plan="scale">
                     <span class="eb-badge">50% OFF</span>
-                    <div class="price-name">Elite</div>
+                    <div class="price-name">Scale</div>
                     <div class="price-desc">For high-volume stores</div>
                     <div class="price-original">$499/mo</div>
                     <div class="price-amount"><span class="price-full">$499</span><span class="price-discounted">$249.50</span> <span>USD/mo</span></div>
@@ -1041,20 +1036,6 @@
         </div>
     </section>
 
-
-    <!-- SUPPORT -->
-    <section id="support" style="background: var(--bg-subtle); border-top: 1px solid var(--border);">
-        <div class="container" style="text-align: center; padding-top: 80px; padding-bottom: 80px;">
-            <div class="section-label">Help &amp; Support</div>
-            <h2>We&#8217;re <span class="gradient-text">here to help</span></h2>
-            <p class="section-desc" style="margin: 0 auto 40px;">
-                Have a question, need help with setup, or want to report an issue?<br>
-                Get in touch and we&#8217;ll get back to you promptly.
-            </p>
-            <a href="mailto:support@skintlabs.ai" class="btn-primary">support@skintlabs.ai</a>
-        </div>
-    </section>
-
     <!-- FOOTER -->
     <footer>
         <div class="container">
@@ -1072,7 +1053,7 @@
                     <a href="https://github.com/SkintLabs/Jerry-The-Customer-Service-Bot">GitHub</a>
                 </div>
                 <div class="footer-shield">
-                    Protected by <a href="https://wonderwallai.skintlabs.ai" style="color: var(--terracotta);">WonderwallAi</a>
+                    &#128737; Protected by <a href="https://wonderwallai.skintlabs.ai" style="color: var(--terracotta);">WonderwallAi</a>
                 </div>
             </div>
         </div>
@@ -1088,27 +1069,8 @@
         }, { threshold: 0.1 });
         document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 
-        // Early bird pricing — show discounted prices and live counter
+        // Early bird pricing — show discounted prices on all paid cards
         (function() {
-            var TOTAL_SPOTS = 136;
-            var counter = document.getElementById('early-bird-remaining');
-
-            // Try to fetch live count from API, fall back to static
-            async function loadEarlyBird() {
-                try {
-                    var res = await fetch('https://sunsetbot-production.up.railway.app/billing/early-bird-status', { signal: AbortSignal.timeout(3000) });
-                    if (res.ok) {
-                        var data = await res.json();
-                        if (data.remaining_spots !== undefined && counter) {
-                            counter.textContent = data.remaining_spots;
-                            TOTAL_SPOTS = data.remaining_spots;
-                        }
-                    }
-                } catch (e) { /* use static fallback */ }
-            }
-            loadEarlyBird();
-
-            // Show discounted prices on all paid cards
             document.querySelectorAll('.price-card[data-plan]').forEach(function(card) {
                 var badge = card.querySelector('.eb-badge');
                 var original = card.querySelector('.price-original');

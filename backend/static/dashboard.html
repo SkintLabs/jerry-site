@@ -3,616 +3,229 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jerry — Revenue Dashboard</title>
+    <title>Jerry Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <style>
         :root {
-            --terracotta:  #c1666b;
-            --gold:        #d4a040;
-            --beige:       #d4b896;
-            --chocolate:   #4a4032;
-            --bg:          #0c0b0a;
-            --bg-card:     #161412;
-            --bg-card-2:   #1e1a16;
-            --border:      #2e2820;
-            --border-light:#3d3228;
-            --warm-white:  #ede8e0;
-            --text:        #b8aa98;
-            --text-muted:  #6e5f50;
-            --green:       #6aad6e;
-            --green-dim:   rgba(106,173,110,0.12);
-            --green-border:rgba(106,173,110,0.3);
+            --burnt-orange: #e76f51;
+            --coral: #f4a261;
+            --warm-sand: #e9c46a;
+            --deep-purple: #264653;
+            --bg: #1a2332;
+            --bg-card: #1e2a3a;
+            --border: #2a3a4a;
+            --text: #c8d6e5;
+            --text-muted: #7f8fa6;
+            --text-bright: #f0f0f0;
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
         body {
             font-family: 'Inter', sans-serif;
             background: var(--bg);
             color: var(--text);
             line-height: 1.6;
-            padding: 32px 24px;
-            max-width: 1200px;
+            padding: 32px;
+            max-width: 1100px;
             margin: 0 auto;
         }
+        h1, h2, h3 { font-family: 'Noto Serif', serif; color: var(--text-bright); }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+        .header h1 { font-size: 1.6rem; }
+        .header h1 span { color: var(--coral); }
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 100px; font-size: 0.75rem; font-weight: 600; }
+        .badge-active { background: rgba(76,175,80,0.15); color: #66bb6a; border: 1px solid rgba(76,175,80,0.3); }
+        .badge-inactive { background: rgba(231,111,81,0.15); color: var(--burnt-orange); border: 1px solid rgba(231,111,81,0.3); }
+        .badge-plan { background: rgba(244,162,97,0.15); color: var(--coral); border: 1px solid rgba(244,162,97,0.3); }
 
-        h1, h2, h3 { font-family: 'Noto Serif', serif; color: var(--warm-white); }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+        .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; text-align: center; }
+        .stat-value { font-family: 'Noto Serif', serif; font-size: 2rem; font-weight: 900; color: var(--coral); }
+        .stat-label { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
 
-        /* ── Store lookup ── */
-        .lookup-bar {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 40px;
-            max-width: 640px;
-        }
-        .lookup-bar input {
-            flex: 1;
-            background: var(--bg-card);
-            border: 1px solid var(--border-light);
-            border-radius: 100px;
-            padding: 11px 20px;
-            color: var(--warm-white);
-            font-size: 0.9rem;
-            outline: none;
-            font-family: 'Inter', sans-serif;
-        }
-        .lookup-bar input::placeholder { color: var(--text-muted); }
-        .lookup-bar input:focus { border-color: var(--gold); }
-        .lookup-bar button {
-            background: var(--terracotta);
-            color: #fff;
-            border: none;
-            border-radius: 100px;
-            padding: 11px 28px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-family: 'Inter', sans-serif;
-            transition: opacity 0.2s;
-        }
-        .lookup-bar button:hover { opacity: 0.85; }
-
-        /* ── Header ── */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 32px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--border);
-        }
-        .header-left h1 { font-size: 1.8rem; line-height: 1.2; }
-        .header-left h1 .jerry   { color: var(--gold); }
-        .header-left h1 .tagline { color: var(--terracotta); font-size: 1rem; font-weight: 700; display: block; margin-top: 2px; }
-        .store-name { font-size: 0.85rem; color: var(--text-muted); margin-top: 6px; }
-
-        .badges { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-        .badge {
-            display: inline-block;
-            padding: 4px 14px;
-            border-radius: 100px;
-            font-size: 0.72rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-        }
-        .badge-active   { background: var(--green-dim); color: var(--green); border: 1px solid var(--green-border); }
-        .badge-inactive { background: rgba(193,102,107,0.12); color: var(--terracotta); border: 1px solid rgba(193,102,107,0.3); }
-        .badge-plan     { background: rgba(212,160,64,0.12); color: var(--gold); border: 1px solid rgba(212,160,64,0.3); }
-
-        /* ── ROI Hero ── */
-        .roi-hero {
-            background: linear-gradient(135deg, #1a1208 0%, #110e0b 60%, #0e0d0b 100%);
-            border: 1px solid var(--border-light);
-            border-radius: 20px;
-            padding: 32px 36px;
-            margin-bottom: 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 24px;
-            flex-wrap: wrap;
-        }
-        .roi-main-label {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            margin-bottom: 8px;
-        }
-        .roi-revenue {
-            font-family: 'Noto Serif', serif;
-            font-size: 3.2rem;
-            font-weight: 900;
-            color: var(--gold);
-            line-height: 1;
-        }
-        .roi-sub {
-            font-size: 0.85rem;
-            color: var(--text);
-            margin-top: 10px;
-        }
-        .roi-sub span { color: var(--warm-white); font-weight: 600; }
-
-        .roi-multiplier-box {
-            text-align: center;
-            background: rgba(212,160,64,0.06);
-            border: 1px solid rgba(212,160,64,0.2);
-            border-radius: 16px;
-            padding: 20px 28px;
-            min-width: 160px;
-        }
-        .roi-multiplier {
-            font-family: 'Noto Serif', serif;
-            font-size: 2.4rem;
-            font-weight: 900;
-            color: var(--gold);
-        }
-        .roi-multiplier-label {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            margin-top: 4px;
-        }
-
-        /* ── Stats grid ── */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-            margin-bottom: 28px;
-        }
-        .stat-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 22px 20px;
-        }
-        .stat-value {
-            font-family: 'Noto Serif', serif;
-            font-size: 1.9rem;
-            font-weight: 900;
-            color: var(--warm-white);
-            line-height: 1;
-        }
-        .stat-value.accent { color: var(--terracotta); }
-        .stat-label {
-            font-size: 0.78rem;
-            color: var(--text-muted);
-            margin-top: 6px;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-        }
-
-        /* ── Chart ── */
-        .chart-section {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 28px;
-            margin-bottom: 28px;
-        }
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .section-header h2 { font-size: 1.15rem; }
-        .period-tabs { display: flex; gap: 4px; }
-        .period-tab {
-            background: transparent;
-            border: 1px solid var(--border-light);
-            border-radius: 100px;
-            padding: 5px 14px;
-            font-size: 0.78rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            cursor: pointer;
-            font-family: 'Inter', sans-serif;
-            transition: all 0.2s;
-        }
-        .period-tab.active, .period-tab:hover {
-            background: var(--terracotta);
-            border-color: var(--terracotta);
-            color: #fff;
-        }
-        .chart-wrap { position: relative; height: 220px; }
-
-        /* ── Tables ── */
-        .table-section {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 28px;
-            margin-bottom: 28px;
-        }
+        .section { margin-bottom: 32px; }
+        .section h2 { font-size: 1.2rem; margin-bottom: 16px; }
         table { width: 100%; border-collapse: collapse; }
-        th {
-            text-align: left;
-            color: var(--text-muted);
-            font-size: 0.72rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            padding: 0 12px 12px;
-            border-bottom: 1px solid var(--border);
-            font-weight: 600;
-        }
-        td {
-            padding: 13px 12px;
-            border-bottom: 1px solid var(--border);
-            font-size: 0.88rem;
-            vertical-align: middle;
-        }
-        tr:last-child td { border-bottom: none; }
-        tr:hover td { background: rgba(255,255,255,0.015); }
+        th { text-align: left; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; padding: 8px 12px; border-bottom: 1px solid var(--border); }
+        td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+        tr:hover { background: rgba(30,42,58,0.8); }
 
-        .pill {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 100px;
-            font-size: 0.72rem;
-            font-weight: 600;
-        }
-        .pill-green   { background: var(--green-dim); color: var(--green); border: 1px solid var(--green-border); }
-        .pill-orange  { background: rgba(193,102,107,0.1); color: var(--terracotta); border: 1px solid rgba(193,102,107,0.25); }
-        .pill-muted   { background: rgba(255,255,255,0.04); color: var(--text-muted); border: 1px solid var(--border-light); }
+        .resolved { color: #66bb6a; }
+        .unresolved { color: var(--text-muted); }
+        .escalated { color: var(--burnt-orange); }
 
-        .order-id { font-family: monospace; font-size: 0.8rem; color: var(--beige); }
-        .revenue-value { font-weight: 700; color: var(--warm-white); }
-        .date-cell { color: var(--text-muted); font-size: 0.82rem; }
+        .input-row { display: flex; gap: 12px; margin-bottom: 24px; }
+        .input-row input { flex: 1; background: var(--bg-card); border: 1px solid var(--border); border-radius: 100px; padding: 10px 20px; color: var(--text-bright); font-size: 0.9rem; outline: none; }
+        .input-row input:focus { border-color: var(--burnt-orange); }
+        .input-row button { background: var(--burnt-orange); color: var(--text-bright); border: none; border-radius: 100px; padding: 10px 24px; font-weight: 600; cursor: pointer; font-size: 0.9rem; transition: opacity 0.2s; }
+        .input-row button:hover { opacity: 0.9; }
 
-        .empty-row td { text-align: center; color: var(--text-muted); padding: 36px; font-size: 0.88rem; }
+        .loading { text-align: center; padding: 48px; color: var(--text-muted); }
+        .error { color: var(--burnt-orange); text-align: center; padding: 24px; }
 
-        /* ── Loading / error ── */
-        .loading { text-align: center; padding: 64px; color: var(--text-muted); font-size: 0.9rem; }
-        .error   { color: var(--terracotta); text-align: center; padding: 32px; font-size: 0.9rem; }
-
-        /* ── Responsive ── */
-        @media (max-width: 900px) {
+        @media (max-width: 768px) {
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
-            .roi-hero { flex-direction: column; align-items: flex-start; }
-        }
-        @media (max-width: 600px) {
-            .stats-grid { grid-template-columns: 1fr 1fr; }
             body { padding: 16px; }
-            .lookup-bar { max-width: 100%; }
-            .header { flex-direction: column; gap: 12px; }
         }
     </style>
 </head>
 <body>
-
-    <div class="lookup-bar">
-        <input type="text" id="store-input" placeholder="your-store.myshopify.com" />
+    <div class="input-row">
+        <input type="text" id="store-input" placeholder="Enter store domain (e.g. my-store.myshopify.com)" />
         <button onclick="loadDashboard()">Load</button>
     </div>
 
-    <div id="loading" class="loading" style="display:none;">Loading your dashboard…</div>
-    <div id="error"   class="error"   style="display:none;"></div>
-
     <div id="dashboard" style="display:none;">
-
-        <!-- Header -->
         <div class="header">
-            <div class="header-left">
-                <h1>
-                    <span class="jerry">Jerry</span>
-                    <span class="tagline">The Customer Service Bot</span>
-                </h1>
-                <div class="store-name" id="store-name"></div>
-            </div>
-            <div class="badges" id="badges"></div>
-        </div>
-
-        <!-- ROI Hero -->
-        <div class="roi-hero">
             <div>
-                <div class="roi-main-label">Total Revenue Attributed to Jerry</div>
-                <div class="roi-revenue" id="hero-revenue">$0</div>
-                <div class="roi-sub" id="hero-sub"></div>
+                <h1><span>Jerry</span> Dashboard</h1>
+                <div id="store-info" style="margin-top: 4px; font-size: 0.85rem; color: var(--text-muted);"></div>
             </div>
-            <div class="roi-multiplier-box">
-                <div class="roi-multiplier" id="roi-multiple">—</div>
-                <div class="roi-multiplier-label">Return on Investment</div>
-            </div>
+            <div id="badges"></div>
         </div>
 
-        <!-- Stat cards -->
         <div class="stats-grid" id="stats-grid"></div>
 
-        <!-- Revenue chart -->
-        <div class="chart-section">
-            <div class="section-header">
-                <h2>Revenue Trend</h2>
-                <div class="period-tabs">
-                    <button class="period-tab active" onclick="setChartPeriod(30, this)">30d</button>
-                    <button class="period-tab"        onclick="setChartPeriod(14, this)">14d</button>
-                    <button class="period-tab"        onclick="setChartPeriod(7, this)">7d</button>
-                </div>
-            </div>
-            <div class="chart-wrap">
-                <canvas id="revenue-chart"></canvas>
+        <div class="section" id="settings-section">
+            <h2>Settings</h2>
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+                <label for="lang-select" style="font-weight:600;color:var(--text-bright);">Voice Language</label>
+                <select id="lang-select" style="background:var(--bg);border:1px solid var(--border);border-radius:100px;padding:8px 16px;color:var(--text-bright);font-size:0.9rem;outline:none;cursor:pointer;">
+                    <option value="en-US">English</option>
+                    <option value="es-ES">Spanish</option>
+                    <option value="fr-FR">French</option>
+                    <option value="de-DE">German</option>
+                    <option value="it-IT">Italian</option>
+                    <option value="pt-BR">Portuguese</option>
+                    <option value="hi-IN">Hindi</option>
+                    <option value="th-TH">Thai</option>
+                </select>
+                <button id="save-lang-btn" onclick="saveLanguage()" style="background:var(--burnt-orange);color:var(--text-bright);border:none;border-radius:100px;padding:8px 20px;font-weight:600;cursor:pointer;font-size:0.85rem;">Save</button>
+                <span id="lang-status" style="font-size:0.8rem;color:var(--text-muted);"></span>
+                <div style="width:100%;font-size:0.75rem;color:var(--text-muted);margin-top:4px;">Language applies to voice input &amp; output. Text chat works in many languages automatically.</div>
             </div>
         </div>
 
-        <!-- Attributed sales table -->
-        <div class="table-section">
-            <div class="section-header">
-                <h2>Attributed Sales</h2>
-                <span id="sales-count" style="font-size:0.82rem;color:var(--text-muted);"></span>
-            </div>
+        <div class="section">
+            <h2>Recent Conversations</h2>
             <table>
                 <thead>
-                    <tr>
-                        <th>Order ID</th>
-                        <th>Order Value</th>
-                        <th>Jerry's Fee</th>
-                        <th>Date</th>
-                    </tr>
-                </thead>
-                <tbody id="sales-body"></tbody>
-            </table>
-        </div>
-
-        <!-- Conversations table -->
-        <div class="table-section">
-            <div class="section-header">
-                <h2>Recent Conversations</h2>
-            </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Session</th>
-                        <th>Status</th>
-                        <th>Escalated</th>
-                        <th>Date</th>
-                    </tr>
+                    <tr><th>Session</th><th>Status</th><th>Escalated</th><th>Date</th></tr>
                 </thead>
                 <tbody id="chats-body"></tbody>
             </table>
         </div>
+    </div>
 
-    </div><!-- /#dashboard -->
+    <div id="loading" class="loading" style="display:none;">Loading...</div>
+    <div id="error" class="error" style="display:none;"></div>
 
-<script>
-const API = window.location.origin;
-let chartInstance = null;
-let currentDomain = '';
-let planCostUSD = 0;
+    <script>
+        const API = window.location.origin;
 
-const PLAN_COSTS = { starter: 49, growth: 149, scale: 499 };
+        async function loadDashboard() {
+            const domain = document.getElementById('store-input').value.trim();
+            if (!domain) return;
 
-// ── Load everything ────────────────────────────────────────────────────────
-async function loadDashboard() {
-    currentDomain = document.getElementById('store-input').value.trim();
-    if (!currentDomain) return;
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
 
-    show('loading'); hide('dashboard'); hide('error');
+            try {
+                const [statsRes, chatsRes] = await Promise.all([
+                    fetch(`${API}/dashboard/${domain}/stats`),
+                    fetch(`${API}/dashboard/${domain}/recent-chats`),
+                ]);
 
-    try {
-        const [statsRes, chatsRes, salesRes, chartRes] = await Promise.all([
-            fetch(`${API}/dashboard/${currentDomain}/stats`),
-            fetch(`${API}/dashboard/${currentDomain}/recent-chats`),
-            fetch(`${API}/dashboard/${currentDomain}/attributed-sales`),
-            fetch(`${API}/dashboard/${currentDomain}/revenue-chart?days=30`),
-        ]);
+                if (!statsRes.ok) throw new Error(`Stats: ${statsRes.status}`);
+                const stats = await statsRes.json();
+                const chats = chatsRes.ok ? await chatsRes.json() : { chats: [] };
 
-        if (!statsRes.ok) throw new Error(`Store not found (${statsRes.status})`);
-
-        const stats = await statsRes.json();
-        const chats = chatsRes.ok ? await chatsRes.json() : { chats: [] };
-        const sales = salesRes.ok ? await salesRes.json() : { sales: [], currency: 'USD' };
-        const chart = chartRes.ok ? await chartRes.json() : { chart: [] };
-
-        renderAll(stats, chats, sales, chart);
-        hide('loading');
-        show('dashboard');
-    } catch (e) {
-        hide('loading');
-        const el = document.getElementById('error');
-        el.textContent = `Error: ${e.message}`;
-        show('error');
-    }
-}
-
-// ── Render everything ──────────────────────────────────────────────────────
-function renderAll(stats, chats, sales, chart) {
-    const t = stats.totals || {};
-    const u = stats.usage || {};
-    const plan = (stats.plan || 'base').toLowerCase();
-    const currency = sales.currency || 'AUD';
-    const status = stats.subscription_status || 'none';
-
-    planCostUSD = PLAN_COSTS[plan] || 49;
-
-    // Header
-    document.getElementById('store-name').textContent = stats.name || stats.store;
-    const statusClass = status === 'active' ? 'badge-active' : 'badge-inactive';
-    document.getElementById('badges').innerHTML = `
-        <span class="badge badge-plan">${plan.toUpperCase()}</span>
-        <span class="badge ${statusClass}">${status.toUpperCase()}</span>
-    `;
-
-    // ROI hero
-    const totalRev = t.attributed_revenue || 0;
-    document.getElementById('hero-revenue').textContent = formatMoney(totalRev, currency);
-
-    const roi = planCostUSD > 0 ? (totalRev / planCostUSD) : null;
-    if (roi !== null) {
-        document.getElementById('roi-multiple').textContent = roi.toFixed(1) + '×';
-    }
-
-    const savingsMsg = roi && roi > 1
-        ? `Jerry has returned <span>${roi.toFixed(1)}× your ${formatMoney(planCostUSD, currency)}/mo subscription</span> in attributed sales`
-        : `Sales attributed since install — Jerry pays for itself once past <span>${formatMoney(planCostUSD, currency)}/mo</span>`;
-    document.getElementById('hero-sub').innerHTML = savingsMsg;
-
-    // Stat cards
-    document.getElementById('stats-grid').innerHTML = `
-        <div class="stat-card">
-            <div class="stat-value accent">${commas(t.conversations || 0)}</div>
-            <div class="stat-label">Conversations</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-value">${commas(t.resolutions || 0)}</div>
-            <div class="stat-label">Resolutions</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-value">${sales.sales ? commas(sales.sales.length) : '0'}</div>
-            <div class="stat-label">Orders Attributed</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-value">${u.current || 0}<span style="font-size:1rem;color:var(--text-muted);">/${u.limit || '∞'}</span></div>
-            <div class="stat-label">Usage This Cycle</div>
-        </div>
-    `;
-
-    // Chart
-    renderChart(chart.chart || [], currency);
-
-    // Sales table
-    const salesList = sales.sales || [];
-    document.getElementById('sales-count').textContent =
-        salesList.length ? `${salesList.length} attributed order${salesList.length !== 1 ? 's' : ''}` : '';
-
-    const salesBody = document.getElementById('sales-body');
-    if (!salesList.length) {
-        salesBody.innerHTML = `<tr class="empty-row"><td colspan="4">No attributed sales yet — they appear here when a customer chats with Jerry then places an order</td></tr>`;
-    } else {
-        salesBody.innerHTML = salesList.map(s => {
-            const feeDollars = s.commission_cents ? (s.commission_cents / 100).toFixed(2) : '—';
-            return `
-            <tr>
-                <td><span class="order-id">#${s.shopify_order_id}</span></td>
-                <td><span class="revenue-value">${formatMoney(s.order_value, currency)}</span></td>
-                <td>${feeDollars !== '—' ? `<span style="color:var(--text-muted);">$${feeDollars}</span>` : '—'}</td>
-                <td class="date-cell">${fmtDate(s.created_at)}</td>
-            </tr>`;
-        }).join('');
-    }
-
-    // Chats table
-    const chatList = chats.chats || [];
-    const chatsBody = document.getElementById('chats-body');
-    if (!chatList.length) {
-        chatsBody.innerHTML = `<tr class="empty-row"><td colspan="4">No conversations yet</td></tr>`;
-    } else {
-        chatsBody.innerHTML = chatList.map(c => `
-            <tr>
-                <td><span class="order-id">${(c.session_token || String(c.id)).slice(0, 14)}…</span></td>
-                <td>${c.resolved
-                    ? '<span class="pill pill-green">Resolved</span>'
-                    : '<span class="pill pill-muted">Open</span>'}</td>
-                <td>${c.human_intervention
-                    ? '<span class="pill pill-orange">Escalated</span>'
-                    : '<span style="color:var(--text-muted)">—</span>'}</td>
-                <td class="date-cell">${fmtDate(c.created_at)}</td>
-            </tr>
-        `).join('');
-    }
-}
-
-// ── Chart ──────────────────────────────────────────────────────────────────
-function renderChart(data, currency) {
-    const ctx = document.getElementById('revenue-chart').getContext('2d');
-    if (chartInstance) chartInstance.destroy();
-
-    const labels  = data.map(d => fmtChartDate(d.date));
-    const values  = data.map(d => d.revenue);
-    const hasData = values.some(v => v > 0);
-
-    chartInstance = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels,
-            datasets: [{
-                data: values,
-                borderColor: '#d4a040',
-                backgroundColor: 'rgba(212,160,64,0.08)',
-                borderWidth: 2,
-                pointRadius: hasData ? 3 : 0,
-                pointBackgroundColor: '#d4a040',
-                fill: true,
-                tension: 0.4,
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    backgroundColor: '#1e1a16',
-                    borderColor: '#3d3228',
-                    borderWidth: 1,
-                    titleColor: '#ede8e0',
-                    bodyColor: '#b8aa98',
-                    callbacks: {
-                        label: ctx => ` ${formatMoney(ctx.raw, currency)}`
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    ticks: { color: '#6e5f50', font: { size: 11 }, maxTicksLimit: 8 },
-                    grid:  { color: 'rgba(255,255,255,0.03)' }
-                },
-                y: {
-                    ticks: {
-                        color: '#6e5f50',
-                        font: { size: 11 },
-                        callback: v => `$${commas(Math.round(v))}`
-                    },
-                    grid:  { color: 'rgba(255,255,255,0.04)' },
-                    beginAtZero: true,
-                }
+                renderDashboard(stats, chats);
+                loadSettings(domain);
+            } catch (e) {
+                document.getElementById('error').textContent = `Error: ${e.message}`;
+                document.getElementById('error').style.display = 'block';
+            } finally {
+                document.getElementById('loading').style.display = 'none';
             }
         }
-    });
-}
 
-async function setChartPeriod(days, btn) {
-    document.querySelectorAll('.period-tab').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+        function renderDashboard(stats, chats) {
+            document.getElementById('dashboard').style.display = 'block';
+            document.getElementById('store-info').textContent = `${stats.name || stats.store}`;
 
-    try {
-        const res = await fetch(`${API}/dashboard/${currentDomain}/revenue-chart?days=${days}`);
-        if (!res.ok) return;
-        const data = await res.json();
-        renderChart(data.chart || [], data.currency || 'AUD');
-    } catch (_) {}
-}
+            const status = stats.subscription_status || 'none';
+            const statusClass = status === 'active' ? 'badge-active' : 'badge-inactive';
+            document.getElementById('badges').innerHTML = `
+                <span class="badge badge-plan">${(stats.plan || 'base').toUpperCase()}</span>
+                <span class="badge ${statusClass}" style="margin-left:8px;">${status.toUpperCase()}</span>
+            `;
 
-// ── Helpers ────────────────────────────────────────────────────────────────
-function formatMoney(val, currency) {
-    const sym = currency === 'USD' ? 'US$' : currency === 'GBP' ? '£' : currency === 'EUR' ? '€' : '$';
-    return `${sym}${commas(Math.round(val))}`;
-}
-function commas(n) {
-    return Number(n).toLocaleString();
-}
-function fmtDate(iso) {
-    if (!iso) return '—';
-    return new Date(iso).toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-}
-function fmtChartDate(dateStr) {
-    const d = new Date(dateStr + 'T00:00:00');
-    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-}
-function show(id) { document.getElementById(id).style.display = ''; }
-function hide(id) { document.getElementById(id).style.display = 'none'; }
+            const grid = document.getElementById('stats-grid');
+            const t = stats.totals || {};
+            const u = stats.usage || {};
+            grid.innerHTML = `
+                <div class="stat-card"><div class="stat-value">${t.conversations || 0}</div><div class="stat-label">Conversations</div></div>
+                <div class="stat-card"><div class="stat-value">${t.resolutions || 0}</div><div class="stat-label">Resolutions</div></div>
+                <div class="stat-card"><div class="stat-value">$${(t.attributed_revenue || 0).toLocaleString()}</div><div class="stat-label">Attributed Revenue</div></div>
+                <div class="stat-card"><div class="stat-value">${u.current || 0}/${u.limit || '~'}</div><div class="stat-label">Usage This Cycle</div></div>
+            `;
 
-// Auto-load if URL has ?store=
-const params = new URLSearchParams(window.location.search);
-if (params.get('store')) {
-    document.getElementById('store-input').value = params.get('store');
-    loadDashboard();
-}
-</script>
+            const tbody = document.getElementById('chats-body');
+            const rows = (chats.chats || []).map(c => `
+                <tr>
+                    <td style="font-family:monospace;font-size:0.8rem;">${c.session_token?.slice(0,12) || c.id}...</td>
+                    <td class="${c.resolved ? 'resolved' : 'unresolved'}">${c.resolved ? 'Resolved' : 'Open'}</td>
+                    <td class="${c.human_intervention ? 'escalated' : ''}">${c.human_intervention ? 'Yes' : 'No'}</td>
+                    <td style="color:var(--text-muted);font-size:0.85rem;">${c.created_at ? new Date(c.created_at).toLocaleString() : '—'}</td>
+                </tr>
+            `).join('');
+            tbody.innerHTML = rows || '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);">No conversations yet</td></tr>';
+        }
+
+        async function loadSettings(domain) {
+            try {
+                const res = await fetch(`${API}/dashboard/${domain}/settings`);
+                if (res.ok) {
+                    const data = await res.json();
+                    document.getElementById('lang-select').value = data.chat_language || 'en-US';
+                }
+            } catch {}
+        }
+
+        async function saveLanguage() {
+            const domain = document.getElementById('store-input').value.trim();
+            if (!domain) return;
+            const lang = document.getElementById('lang-select').value;
+            const statusEl = document.getElementById('lang-status');
+            try {
+                const res = await fetch(`${API}/dashboard/${domain}/settings`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_language: lang }),
+                });
+                if (res.ok) {
+                    statusEl.textContent = 'Saved!';
+                    statusEl.style.color = '#66bb6a';
+                } else {
+                    statusEl.textContent = 'Failed to save';
+                    statusEl.style.color = 'var(--burnt-orange)';
+                }
+            } catch {
+                statusEl.textContent = 'Failed to save';
+                statusEl.style.color = 'var(--burnt-orange)';
+            }
+            setTimeout(() => { statusEl.textContent = ''; }, 3000);
+        }
+
+        // Auto-load if URL has ?store= param
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('store')) {
+            document.getElementById('store-input').value = params.get('store');
+            loadDashboard();
+        }
+    </script>
 </body>
 </html>

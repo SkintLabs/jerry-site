@@ -52,9 +52,41 @@ logger = logging.getLogger("sunsetbot.shopify")
 
 router = APIRouter(prefix="/shopify", tags=["Shopify"])
 
-# In-memory nonce store for OAuth state verification
-# In production, use Redis with short TTL
-_oauth_nonces: dict[str, str] = {}  # nonce → shop domain
+
+# ============================================================================
+# REDIS HELPERS — OAuth nonce storage
+# ============================================================================
+
+def _get_redis_client():
+    """Return an async Redis client, or None if Redis is not configured."""
+    settings = get_settings()
+    if not settings.redis_configured:
+        return None
+    try:
+        import redis.asyncio as aioredis
+        return aioredis.from_url(settings.redis_url, decode_responses=False)
+    except Exception as e:
+        logger.warning(f"Failed to create Redis client: {e}")
+        return None
+
+
+async def _store_nonce(redis_client, nonce: str, shop: str) -> None:
+    """Store OAuth nonce in Redis with 10-minute TTL."""
+    await redis_client.setex(f"shopify_oauth_nonce:{nonce}", 600, shop)
+
+
+async def _verify_and_consume_nonce(redis_client, nonce: str, shop: str) -> bool:
+    """Verify nonce matches shop and delete it (one-time use)."""
+    key = f"shopify_oauth_nonce:{nonce}"
+    stored_shop = await redis_client.get(key)
+    if stored_shop is None:
+        return False
+    # Compare (Redis may return bytes)
+    stored = stored_shop.decode() if isinstance(stored_shop, bytes) else stored_shop
+    if stored != shop:
+        return False
+    await redis_client.delete(key)
+    return True
 
 
 # ============================================================================
@@ -80,9 +112,17 @@ async def shopify_install(shop: str = Query(..., description="e.g. my-store.mysh
     if not shop.endswith(".myshopify.com"):
         raise HTTPException(status_code=400, detail="Invalid shop domain. Must end with .myshopify.com")
 
-    # Generate nonce for CSRF protection
+    # Generate nonce for CSRF protection and store in Redis
     nonce = secrets.token_urlsafe(32)
-    _oauth_nonces[nonce] = shop
+    redis_client = _get_redis_client()
+    if redis_client is None:
+        logger.warning("Redis not available — OAuth nonce will not be stored; callback will fail")
+    else:
+        try:
+            await _store_nonce(redis_client, nonce, shop)
+        except Exception as e:
+            logger.error(f"Failed to store OAuth nonce in Redis: {e}")
+            raise HTTPException(status_code=503, detail="OAuth state storage unavailable")
 
     # Build Shopify OAuth URL
     redirect_uri = f"{settings.app_url}/shopify/callback"
@@ -123,11 +163,17 @@ async def shopify_callback(request: Request):
         raise HTTPException(status_code=400, detail="Missing required OAuth parameters")
 
     # --- Verify nonce (CSRF protection) ---
-    expected_shop = _oauth_nonces.pop(state, None)
-    if expected_shop is None:
+    redis_client = _get_redis_client()
+    if redis_client is None:
+        logger.warning("Redis not available — cannot verify OAuth nonce")
+        raise HTTPException(status_code=503, detail="OAuth state verification unavailable")
+    try:
+        nonce_valid = await _verify_and_consume_nonce(redis_client, state, shop)
+    except Exception as e:
+        logger.error(f"Redis error during nonce verification: {e}")
+        raise HTTPException(status_code=503, detail="OAuth state verification unavailable")
+    if not nonce_valid:
         raise HTTPException(status_code=403, detail="Invalid or expired OAuth state")
-    if expected_shop != shop:
-        raise HTTPException(status_code=403, detail="Shop mismatch in OAuth state")
 
     # --- Verify HMAC (proves request came from Shopify) ---
     if not verify_shopify_hmac(query_params):
@@ -212,49 +258,12 @@ async def shopify_callback(request: Request):
     except ImportError:
         logger.warning("shopify_sync not available — skipping initial product sync")
 
-    # --- Return success page ---
-    return HTMLResponse(content=f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Jerry The Customer Service Bot — Installed!</title>
-        <style>
-            body {{
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-                display: flex; justify-content: center; align-items: center;
-                min-height: 100vh; margin: 0;
-                background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-                color: #fff;
-            }}
-            .card {{
-                background: rgba(255,255,255,0.1);
-                backdrop-filter: blur(10px);
-                border-radius: 16px; padding: 48px;
-                text-align: center; max-width: 500px;
-                border: 1px solid rgba(255,255,255,0.2);
-            }}
-            h1 {{ color: #FF6B35; margin-bottom: 16px; }}
-            p {{ color: #ccc; line-height: 1.6; }}
-            .store-name {{ color: #fff; font-weight: bold; }}
-        </style>
-    </head>
-    <body>
-        <div class="card">
-            <h1>Jerry The Customer Service Bot Installed!</h1>
-            <p>
-                Your store <span class="store-name">{store_domain}</span> is now connected.
-            </p>
-            <p>
-                We're syncing your product catalog now — this usually takes under a minute.
-                Once done, your AI shopping assistant will be ready to go!
-            </p>
-            <p style="margin-top: 24px; font-size: 14px; color: #999;">
-                You can close this tab and return to your Shopify admin.
-            </p>
-        </div>
-    </body>
-    </html>
-    """)
+    # --- Redirect to Shopify billing (plan selection) ---
+    # After install, take merchant straight to billing approval via Shopify's native UI.
+    # Default to "base" plan — merchant can upgrade later from the dashboard.
+    billing_url = f"{settings.app_url}/billing/shopify/subscribe?shop={store_domain}&plan=base"
+    logger.info(f"Redirecting {store_domain} to Shopify billing approval")
+    return RedirectResponse(url=billing_url)
 
 
 # ============================================================================
@@ -299,6 +308,8 @@ async def get_widget_token(
         "store_name": store.name,
         "widget_color": store.widget_color,
         "welcome_message": store.welcome_message,
+        "chat_language": getattr(store, "chat_language", "en-US") or "en-US",
+        "tts_enabled": get_settings().openai_configured,
     }
 
 
@@ -346,8 +357,133 @@ async def shopify_webhooks(request: Request):
         await _handle_refund_created(shop_domain, payload)
     elif topic == "orders/create":
         await _handle_order_created(shop_domain, payload)
+    elif topic == "app_subscriptions/activate":
+        subscription_id = payload.get("app_subscription", {}).get("admin_graphql_api_id")
+        if subscription_id:
+            async with get_db() as db:
+                result = await db.execute(
+                    select(Store).where(Store.shopify_domain == shop_domain)
+                )
+                store = result.scalar_one_or_none()
+                if store:
+                    store.subscription_status = "active"
+                    store.shopify_subscription_id = subscription_id
+                    logger.info(f"Shopify subscription activated for {shop_domain}: {subscription_id}")
+                else:
+                    logger.warning(f"app_subscriptions/activate: store not found for {shop_domain}")
+    elif topic == "app_subscriptions/cancelled":
+        async with get_db() as db:
+            result = await db.execute(
+                select(Store).where(Store.shopify_domain == shop_domain)
+            )
+            store = result.scalar_one_or_none()
+            if store:
+                store.subscription_status = "cancelled"
+                logger.info(f"Shopify subscription cancelled for {shop_domain}")
+            else:
+                logger.warning(f"app_subscriptions/cancelled: store not found for {shop_domain}")
+    elif topic == "app_subscriptions/approaching_capped_amount":
+        logger.warning(f"Shopify subscription approaching cap for {shop_domain}")
     else:
         logger.info(f"Unhandled webhook topic: {topic}")
+
+    return Response(status_code=200)
+
+
+# ============================================================================
+# GDPR MANDATORY WEBHOOKS — Required for Shopify App Store
+# ============================================================================
+
+@router.post("/gdpr/customers-data-request")
+async def gdpr_customers_data_request(request: Request):
+    """
+    Shopify GDPR: Customer data request.
+    A store owner requests data Jerry holds about a specific customer.
+    Jerry only stores anonymous chat sessions (no PII), so we acknowledge the request.
+    """
+    body = await request.body()
+    hmac_header = request.headers.get("X-Shopify-Hmac-Sha256", "")
+
+    if not verify_shopify_webhook(body, hmac_header):
+        raise HTTPException(status_code=401, detail="Invalid webhook signature")
+
+    import json
+    payload = json.loads(body)
+    shop_domain = payload.get("shop_domain", "unknown")
+    logger.info(f"GDPR customers/data_request from {shop_domain} — Jerry stores no customer PII")
+
+    return Response(status_code=200)
+
+
+@router.post("/gdpr/customers-redact")
+async def gdpr_customers_redact(request: Request):
+    """
+    Shopify GDPR: Customer data erasure request.
+    A customer requests deletion of their data. Jerry stores no customer PII
+    (only anonymous session IDs), so we acknowledge the request.
+    """
+    body = await request.body()
+    hmac_header = request.headers.get("X-Shopify-Hmac-Sha256", "")
+
+    if not verify_shopify_webhook(body, hmac_header):
+        raise HTTPException(status_code=401, detail="Invalid webhook signature")
+
+    import json
+    payload = json.loads(body)
+    shop_domain = payload.get("shop_domain", "unknown")
+    logger.info(f"GDPR customers/redact from {shop_domain} — Jerry stores no customer PII")
+
+    return Response(status_code=200)
+
+
+@router.post("/gdpr/shop-redact")
+async def gdpr_shop_redact(request: Request):
+    """
+    Shopify GDPR: Shop data erasure request.
+    48 hours after a store uninstalls, Shopify requests deletion of all store data.
+    We delete the store record and all associated chat sessions, resolutions, and sales.
+    """
+    body = await request.body()
+    hmac_header = request.headers.get("X-Shopify-Hmac-Sha256", "")
+
+    if not verify_shopify_webhook(body, hmac_header):
+        raise HTTPException(status_code=401, detail="Invalid webhook signature")
+
+    import json
+    payload = json.loads(body)
+    shop_domain = payload.get("shop_domain", "unknown")
+
+    logger.info(f"GDPR shop/redact for {shop_domain} — deleting all store data")
+
+    try:
+        from app.db.models import ChatSession, SupportResolution, AttributedSale, ChatInteraction
+        from sqlalchemy import delete
+
+        async with get_db() as db:
+            result = await db.execute(
+                select(Store).where(Store.shopify_domain == shop_domain)
+            )
+            store = result.scalar_one_or_none()
+
+            if store:
+                # Delete all related records (cascade should handle this, but be explicit)
+                await db.execute(
+                    delete(ChatInteraction).where(
+                        ChatInteraction.session_id.in_(
+                            select(ChatSession.id).where(ChatSession.merchant_id == store.id)
+                        )
+                    )
+                )
+                await db.execute(delete(SupportResolution).where(SupportResolution.merchant_id == store.id))
+                await db.execute(delete(AttributedSale).where(AttributedSale.merchant_id == store.id))
+                await db.execute(delete(ChatSession).where(ChatSession.merchant_id == store.id))
+                await db.delete(store)
+                logger.info(f"All data deleted for {shop_domain}")
+            else:
+                logger.info(f"No store found for {shop_domain} — nothing to delete")
+
+    except Exception as e:
+        logger.error(f"GDPR shop/redact failed for {shop_domain}: {e}", exc_info=True)
 
     return Response(status_code=200)
 

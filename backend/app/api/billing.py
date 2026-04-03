@@ -4,7 +4,6 @@ Handles Stripe subscription management and webhook processing.
 """
 
 import logging
-import os
 
 from fastapi import APIRouter, HTTPException, Request, Response
 from fastapi.responses import RedirectResponse
@@ -88,7 +87,8 @@ async def checkout(plan: str = "base"):
     except ImportError:
         raise HTTPException(status_code=503, detail="Stripe not available")
 
-    from app.services.billing_service import get_plan_config
+    from app.services.billing_service import PLAN_CONFIG
+    import os
 
     api_key = os.getenv("STRIPE_SECRET_KEY", "")
     if not api_key:
@@ -96,40 +96,22 @@ async def checkout(plan: str = "base"):
 
     stripe_mod.api_key = api_key
 
-    plan_config = get_plan_config()
-    config = plan_config.get(plan)
+    config = PLAN_CONFIG.get(plan)
     if not config:
-        valid_plans = ", ".join(k for k in plan_config.keys() if k not in ("base", "elite"))
+        valid_plans = ", ".join(PLAN_CONFIG.keys())
         raise HTTPException(status_code=400, detail=f"Invalid plan '{plan}'. Valid plans: {valid_plans}.")
 
-    flat_id = config.get("flat_price_id", "")
-    metered_id = config.get("metered_price_id", "")
-
-    if not flat_id or flat_id.startswith("price_placeholder"):
-        logger.error(f"Flat price not configured for plan '{plan}': {flat_id!r}")
-        raise HTTPException(status_code=503, detail="Billing not fully configured for this plan. Please try again later.")
-
-    # Build line items — flat fee is required, metered resolution is optional
-    line_items = [{"price": flat_id, "quantity": 1}]
-    if metered_id and not metered_id.startswith("price_placeholder"):
-        line_items.append({"price": metered_id})
-    else:
-        logger.info(f"Metered price not configured for plan '{plan}' — checkout will use flat fee only")
-
-    coupon_id = os.getenv("JERRY_EARLY_50_OFF", "")
-    session_params = dict(
-        mode="subscription",
-        line_items=line_items,
-        success_url="https://jerry.skintlabs.ai/?checkout=success",
-        cancel_url="https://jerry.skintlabs.ai/#pricing",
-        allow_promotion_codes=True,
-    )
-    if coupon_id:
-        session_params["discounts"] = [{"coupon": coupon_id}]
-        session_params.pop("allow_promotion_codes")  # cannot combine with discounts
-
     try:
-        session = stripe_mod.checkout.Session.create(**session_params)
+        session = stripe_mod.checkout.Session.create(
+            mode="subscription",
+            line_items=[
+                {"price": config["flat_price_id"], "quantity": 1},
+                {"price": config["metered_price_id"]},
+            ],
+            success_url="https://jerry.skintlabs.ai/?checkout=success",
+            cancel_url="https://jerry.skintlabs.ai/#pricing",
+            allow_promotion_codes=True,
+        )
         return RedirectResponse(session.url, status_code=303)
     except Exception as e:
         logger.error(f"Failed to create checkout session: {e}")
@@ -235,6 +217,90 @@ async def _find_store_by_subscription(subscription_id: str):
             select(Store).where(Store.stripe_subscription_id == subscription_id)
         )
         return result.scalar_one_or_none()
+
+
+@router.get("/shopify/subscribe")
+async def shopify_subscribe(
+    shop: str,
+    plan: str = "base",
+):
+    """Initiate Shopify App Subscription — redirects merchant to Shopify billing approval page."""
+    from app.services.billing_service import ShopifyBillingService
+    from app.core.config import get_settings
+    settings = get_settings()
+
+    if plan not in ("base", "growth", "elite"):
+        raise HTTPException(status_code=400, detail="Invalid plan. Choose: base, growth, elite")
+
+    # Look up the store
+    async with get_db() as db:
+        result = await db.execute(select(Store).where(Store.shopify_domain == shop))
+        store = result.scalar_one_or_none()
+
+    if not store:
+        raise HTTPException(status_code=404, detail="Store not found")
+
+    return_url = f"{settings.app_url}/billing/shopify/callback?shop={shop}&plan={plan}"
+
+    shopify_billing = ShopifyBillingService()
+    sub_result = await shopify_billing.create_subscription(
+        shop_domain=shop,
+        access_token=store.access_token,
+        plan=plan,
+        return_url=return_url,
+    )
+
+    # Store the pending subscription ID
+    async with get_db() as db:
+        result = await db.execute(select(Store).where(Store.shopify_domain == shop))
+        store = result.scalar_one()
+        store.shopify_subscription_id = sub_result["subscription_id"]
+        store.jerry_plan = plan
+
+    # Redirect merchant to Shopify billing approval
+    return RedirectResponse(url=sub_result["confirmation_url"])
+
+
+@router.get("/shopify/callback")
+async def shopify_billing_callback(
+    shop: str,
+    plan: str,
+    charge_id: str = None,
+):
+    """Handle return from Shopify billing approval page."""
+    from app.core.config import get_settings
+    settings = get_settings()
+
+    async with get_db() as db:
+        result = await db.execute(select(Store).where(Store.shopify_domain == shop))
+        store = result.scalar_one_or_none()
+
+    if not store:
+        raise HTTPException(status_code=404, detail="Store not found")
+
+    if charge_id:
+        # Merchant approved — start 7-day trial immediately so the app is usable at once.
+        # The Shopify app_subscriptions/activate webhook will later confirm and set to "active".
+        async with get_db() as db:
+            result = await db.execute(select(Store).where(Store.shopify_domain == shop))
+            store = result.scalar_one()
+            store.subscription_status = "trialing"
+            store.jerry_plan = plan
+            # Persist the numeric charge_id as a temporary reference until
+            # the webhook overwrites it with the full GID (gid://shopify/AppSubscription/…)
+            if not store.shopify_subscription_id:
+                store.shopify_subscription_id = str(charge_id)
+        logger.info(f"Shopify billing approved for {shop}, plan={plan}, charge_id={charge_id} → trialing")
+        # Redirect to Jerry dashboard
+        return RedirectResponse(url=f"{settings.app_url}/static/dashboard.html?store={shop}&billing=approved")
+    else:
+        # Merchant declined
+        async with get_db() as db:
+            result = await db.execute(select(Store).where(Store.shopify_domain == shop))
+            store = result.scalar_one()
+            store.subscription_status = "cancelled"
+        logger.warning(f"Shopify billing declined for {shop}")
+        return RedirectResponse(url=f"{settings.app_url}/static/dashboard.html?store={shop}&billing=declined")
 
 
 @router.get("/usage/{store_domain}")
