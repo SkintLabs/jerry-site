@@ -491,6 +491,54 @@
             pointer-events: none;
         }
 
+        /* ── INSTALL FORM ── */
+        .hero-install { margin-top: 28px; }
+        .install-input-wrap {
+            display: flex; gap: 8px; max-width: 480px;
+        }
+        .install-input-wrap input {
+            flex: 1; padding: 14px 20px;
+            background: #1c1a17; border: 1px solid #3a3530;
+            border-radius: 100px; color: #ede8e0;
+            font-family: 'Inter', sans-serif; font-size: 0.95rem; outline: none;
+            transition: border-color 0.2s;
+        }
+        .install-input-wrap input::placeholder { color: #5a5248; }
+        .install-input-wrap input:focus { border-color: #c1666b; }
+        .install-btn {
+            padding: 14px 22px; background: #c1666b; color: #ede8e0;
+            border: none; border-radius: 100px;
+            font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 600;
+            cursor: pointer; white-space: nowrap; transition: all 0.2s;
+        }
+        .install-btn:hover { background: #d07478; box-shadow: 0 4px 20px rgba(193,102,107,0.4); }
+        .install-note { margin-top: 10px; font-size: 0.82rem; color: #8a7d6e; }
+
+        /* ── INSTALL MODAL ── */
+        .install-modal-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.75); z-index: 1000;
+            align-items: center; justify-content: center;
+        }
+        .install-modal-overlay.open { display: flex; }
+        .install-modal {
+            background: #141210; border: 1px solid #2e2a25;
+            border-radius: 20px; padding: 36px 32px; max-width: 440px; width: 90%;
+            text-align: center; position: relative;
+        }
+        .install-modal h3 {
+            font-family: 'Noto Serif', Georgia, serif; font-size: 1.3rem;
+            color: #ede8e0; margin-bottom: 6px;
+        }
+        .install-modal p { font-size: 0.9rem; color: #8a7d6e; margin-bottom: 20px; }
+        .install-modal .install-input-wrap { max-width: 100%; }
+        .install-modal-close {
+            position: absolute; top: 16px; right: 20px;
+            background: none; border: none; color: #8a7d6e;
+            font-size: 1.4rem; cursor: pointer; line-height: 1;
+        }
+        .install-modal-close:hover { color: #ede8e0; }
+
         /* ── FOOTER ── */
         footer { border-top: 1px solid var(--border); padding: 48px 0; }
         .footer-content {
@@ -581,6 +629,13 @@
                     </p>
                     <div class="hero-buttons">
                         <a class="btn-primary" href="https://sunsetbot-production.up.railway.app/static/demo.html" target="_blank" rel="noopener">Try Free Demo &rarr;</a>
+                    </div>
+                    <div class="hero-install">
+                        <div class="install-input-wrap">
+                            <input type="text" id="shop-url-hero" placeholder="yourstore.myshopify.com" autocomplete="off" spellcheck="false">
+                            <button class="install-btn" onclick="startInstall('shop-url-hero')">Start Free Trial</button>
+                        </div>
+                        <p class="install-note">7-day free trial. No credit card until day 8.</p>
                     </div>
                 </div>
                 <div class="hero-chat">
@@ -987,7 +1042,7 @@
                         <li><span class="check">&#10003;</span> Voice chat &amp; 8 languages</li>
                         <li><span class="check">&#10003;</span> AI security (WonderwallAi)</li>
                     </ul>
-                    <a class="btn-price btn-price-secondary" href="https://sunsetbot-production.up.railway.app/shopify/install">Get Started</a>
+                    <button class="btn-price btn-price-secondary" onclick="openInstallModal('Starter')">Start Free Trial</button>
                 </div>
                 <div class="price-card featured" data-plan="growth">
                     <span class="eb-badge">50% OFF</span>
@@ -1003,7 +1058,7 @@
                         <li><span class="check">&#10003;</span> Priority support</li>
                         <li><span class="check">&#10003;</span> Custom brand voice training</li>
                     </ul>
-                    <a class="btn-price btn-price-primary" href="https://sunsetbot-production.up.railway.app/shopify/install">Get Started</a>
+                    <button class="btn-price btn-price-primary" onclick="openInstallModal('Growth')">Start Free Trial</button>
                 </div>
                 <div class="price-card" data-plan="scale">
                     <span class="eb-badge">50% OFF</span>
@@ -1018,7 +1073,7 @@
                         <li><span class="check">&#10003;</span> Custom escalation workflows</li>
                         <li><span class="check">&#10003;</span> Advanced analytics dashboard</li>
                     </ul>
-                    <a class="btn-price btn-price-secondary" href="https://sunsetbot-production.up.railway.app/shopify/install">Get Started</a>
+                    <button class="btn-price btn-price-secondary" onclick="openInstallModal('Scale')">Start Free Trial</button>
                 </div>
             </div>
         </div>
@@ -1031,7 +1086,13 @@
             <p class="section-desc" style="margin: 0 auto 40px; text-align: center;">
                 Jerry The Customer Service Bot handles the support. You focus on growing your business.
             </p>
-            <a class="btn-primary" href="#pricing">Get Started &rarr;</a>
+            <div class="hero-install" style="display:inline-block;text-align:left;">
+                <div class="install-input-wrap">
+                    <input type="text" id="shop-url-cta" placeholder="yourstore.myshopify.com" autocomplete="off" spellcheck="false">
+                    <button class="install-btn" onclick="startInstall('shop-url-cta')">Start Free Trial &rarr;</button>
+                </div>
+                <p class="install-note" style="text-align:center;">7-day free trial. No credit card until day 8.</p>
+            </div>
         </div>
     </section>
 
@@ -1060,6 +1121,20 @@
 
     </div><!-- .page-wrap -->
 
+    <!-- Install Modal -->
+    <div class="install-modal-overlay" id="install-modal">
+        <div class="install-modal">
+            <button class="install-modal-close" onclick="closeInstallModal()">&times;</button>
+            <h3>Start Your Free Trial</h3>
+            <p id="modal-plan-desc">7 days free on the <strong id="modal-plan-name"></strong> plan. No credit card until day 8.</p>
+            <div class="install-input-wrap">
+                <input type="text" id="shop-url-modal" placeholder="yourstore.myshopify.com" autocomplete="off" spellcheck="false">
+                <button class="install-btn" onclick="startInstall('shop-url-modal')">Install Jerry</button>
+            </div>
+            <p class="install-note" style="margin-top:12px;">Enter your Shopify store URL above.</p>
+        </div>
+    </div>
+
     <script>
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
@@ -1067,6 +1142,33 @@
             });
         }, { threshold: 0.1 });
         document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+        // Install flow
+        function startInstall(inputId) {
+            var input = document.getElementById(inputId);
+            var shop = input.value.trim().toLowerCase();
+            if (!shop) { input.focus(); input.style.borderColor = '#c1666b'; return; }
+            shop = shop.replace(/^https?:\/\//, '').replace(/\/$/, '');
+            if (!shop.includes('.myshopify.com')) {
+                shop = shop.replace(/\..*$/, '') + '.myshopify.com';
+            }
+            window.location.href = 'https://sunsetbot-production.up.railway.app/shopify/install?shop=' + encodeURIComponent(shop);
+        }
+        function openInstallModal(plan) {
+            document.getElementById('modal-plan-name').textContent = plan;
+            document.getElementById('install-modal').classList.add('open');
+            setTimeout(function() { document.getElementById('shop-url-modal').focus(); }, 100);
+        }
+        function closeInstallModal() {
+            document.getElementById('install-modal').classList.remove('open');
+        }
+        document.getElementById('install-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeInstallModal();
+        });
+        ['shop-url-hero','shop-url-cta','shop-url-modal'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.addEventListener('keydown', function(e) { if (e.key === 'Enter') startInstall(id); });
+        });
 
         // Early bird pricing  -  show discounted prices on all paid cards
         (function() {
