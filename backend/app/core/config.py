@@ -76,8 +76,8 @@ class Settings(BaseSettings):
 
     # --- OpenAI (TTS) ---
     openai_api_key: str = Field(default="", alias="OPENAI_API_KEY")
-    openai_tts_model: str = Field(default="tts-1-hd-1106", alias="OPENAI_TTS_MODEL")
-    openai_tts_voice: str = Field(default="ash", alias="OPENAI_TTS_VOICE")
+    openai_tts_model: str = Field(default="gpt-4o-mini-tts", alias="OPENAI_TTS_MODEL")
+    openai_tts_voice: str = Field(default="cedar", alias="OPENAI_TTS_VOICE")
 
     # --- Admin ---
     admin_api_key: str = Field(default="dev-admin-key-change-me", alias="ADMIN_API_KEY")

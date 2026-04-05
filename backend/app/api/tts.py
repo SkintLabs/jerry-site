@@ -18,7 +18,7 @@ logger = logging.getLogger("jerry.tts")
 
 router = APIRouter(tags=["TTS"])
 
-VALID_VOICES = {"alloy", "echo", "fable", "onyx", "nova", "shimmer"}
+VALID_VOICES = {"alloy", "ash", "ballad", "coral", "echo", "fable", "onyx", "nova", "sage", "shimmer", "verse", "marin", "cedar"}
 EMOJI_RE = re.compile(r"[\U0001F600-\U0001F9FF\U00002700-\U000027BF\U0000FE00-\U0000FE0F\U0001FA00-\U0001FA6F\U0001FA70-\U0001FAFF\U00002600-\U000026FF\U0000200D\U00002B50\U000023CF-\U000023FA\U0001F1E0-\U0001F1FF]+", flags=re.UNICODE)
 
 
