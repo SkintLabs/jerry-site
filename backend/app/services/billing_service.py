@@ -22,22 +22,22 @@ except ImportError:
 
 
 PLAN_CONFIG = {
-    # Base: $49/mo USD flat + $0.25/resolution
-    "base": {
-        "flat_price_id": os.getenv("STRIPE_BASE_FLAT_PRICE_ID", "price_placeholder_base_flat"),
-        "metered_price_id": os.getenv("STRIPE_BASE_METERED_PRICE_ID", "price_placeholder_base_metered"),
-        "per_resolution_usd": 25,           # $0.25
+    # Starter: $49/mo USD flat + $0.25/resolution
+    "starter": {
+        "flat_price_id": os.getenv("STRIPE_STARTER_FLAT_PRICE_ID", "price_placeholder_starter_flat"),
+        "metered_price_id": os.getenv("STRIPE_STARTER_METERED_PRICE_ID", "price_placeholder_starter_metered"),
+        "per_resolution_usd": 25,
     },
     # Growth: $149/mo USD flat + $0.25/resolution
     "growth": {
         "flat_price_id": os.getenv("STRIPE_GROWTH_FLAT_PRICE_ID", "price_placeholder_growth_flat"),
         "metered_price_id": os.getenv("STRIPE_GROWTH_METERED_PRICE_ID", "price_placeholder_growth_metered"),
-        "per_resolution_usd": 25,           # $0.25
+        "per_resolution_usd": 25,
     },
-    # Elite: $499/mo USD flat + $0.25/resolution
-    "elite": {
-        "flat_price_id": os.getenv("STRIPE_ELITE_FLAT_PRICE_ID", "price_placeholder_elite_flat"),
-        "metered_price_id": os.getenv("STRIPE_ELITE_METERED_PRICE_ID", "price_placeholder_elite_metered"),
+    # Scale: $499/mo USD flat + $0.25/resolution
+    "scale": {
+        "flat_price_id": os.getenv("STRIPE_SCALE_FLAT_PRICE_ID", "price_placeholder_scale_flat"),
+        "metered_price_id": os.getenv("STRIPE_SCALE_METERED_PRICE_ID", "price_placeholder_scale_metered"),
         "per_resolution_usd": 25,           # $0.25
     },
 }
