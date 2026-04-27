@@ -620,18 +620,6 @@ async def health_check():
     }
 
 
-@app.get("/", tags=["System"])
-async def root():
-    return {
-        "message": "Jerry The Customer Service Bot API is running!",
-        "version": "4.0.0",
-        "docs": "/docs",
-        "health": "/health",
-        "chat": "ws://localhost:8000/ws/chat/{store_id}/{session_id}?token=xxx",
-        "shopify_install": "/shopify/install?shop=your-store.myshopify.com",
-    }
-
-
 # ---------------------------------------------------------------------------
 # Product Indexing
 # ---------------------------------------------------------------------------
