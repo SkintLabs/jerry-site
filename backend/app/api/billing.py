@@ -80,7 +80,7 @@ async def create_subscription(req: CreateSubscriptionRequest):
 
 
 @router.get("/checkout")
-async def checkout(plan: str = "base"):
+async def checkout(plan: str = "base", skip_trial: int = 0):
     """Create a Stripe Checkout Session and redirect to Stripe-hosted payment page."""
     try:
         import stripe as stripe_mod
@@ -102,7 +102,7 @@ async def checkout(plan: str = "base"):
         raise HTTPException(status_code=400, detail=f"Invalid plan '{plan}'. Valid plans: {valid_plans}.")
 
     try:
-        session = stripe_mod.checkout.Session.create(
+        session_params = dict(
             mode="subscription",
             line_items=[
                 {"price": config["flat_price_id"], "quantity": 1},
@@ -112,6 +112,9 @@ async def checkout(plan: str = "base"):
             cancel_url="https://jerry.skintlabs.ai/#pricing",
             allow_promotion_codes=True,
         )
+        if not skip_trial:
+            session_params["subscription_data"] = {"trial_period_days": 7}
+        session = stripe_mod.checkout.Session.create(**session_params)
         return RedirectResponse(session.url, status_code=303)
     except Exception as e:
         logger.error(f"Failed to create checkout session: {e}")
