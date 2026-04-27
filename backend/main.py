@@ -298,6 +298,27 @@ _static_dir = pathlib.Path(__file__).parent / "static"
 if _static_dir.exists():
     app.mount("/static", StaticFiles(directory=str(_static_dir)), name="static")
 
+# Serve landing page from docs/
+from fastapi.responses import FileResponse as _FileResponse
+_docs_dir = pathlib.Path(__file__).parent.parent / "docs"
+
+@app.get("/", include_in_schema=False)
+async def landing_page():
+    _index = _docs_dir / "index.html"
+    if _index.exists():
+        return _FileResponse(str(_index))
+    return {"status": "Jerry is running"}
+
+_docs_assets_dir = _docs_dir / "assets"
+if _docs_assets_dir.exists():
+    app.mount("/assets", StaticFiles(directory=str(_docs_assets_dir)), name="docs-assets")
+
+@app.get("/og-image.png", include_in_schema=False)
+async def og_image():
+    _f = _docs_dir / "og-image.png"
+    if _f.exists():
+        return _FileResponse(str(_f), media_type="image/png")
+
 
 # ============================================================================
 # WEBSOCKET ENDPOINT — Now with JWT authentication
