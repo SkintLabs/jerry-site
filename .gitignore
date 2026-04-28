@@ -41,3 +41,20 @@ Thumbs.db
 
 # Logs
 *.log
+
+# ── Explicitly exclude sibling projects / personal files that live in
+#    the same parent directory but must NEVER end up in this repo ──
+.claude/
+skintlabs/
+Jerry-The-Customer-Service-Bot-main/
+MeatHead/
+Prospect/
+WonderwallAi-main*/
+assets/
+docs/email-signature.html
+email-signature.html
+*.rtf
+*.pdf
+"claude memory*"
+"Louis Constant*"
+"Skint Labs*"

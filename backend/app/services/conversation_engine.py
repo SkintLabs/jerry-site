@@ -301,9 +301,36 @@ class ResponseGenerator:
         self.model = os.getenv("GROQ_MODEL", self.DEFAULT_MODEL)
 
     async def generate(self, message, context, intent, entities, products, extra_context=None) -> str:
+        store_name = getattr(context.store, "name", None) or "this store"
+        product_block = ""
+        if products:
+            try:
+                lines = []
+                for p in products[:5]:
+                    title = getattr(p, "title", None) or (p.get("title") if isinstance(p, dict) else "Product")
+                    price = getattr(p, "price", None) or (p.get("price") if isinstance(p, dict) else "")
+                    lines.append(f"- {title} ({price})" if price else f"- {title}")
+                product_block = "\n\nMatching products:\n" + "\n".join(lines)
+            except Exception:
+                product_block = ""
+
+        system_prompt = f"""You are Jerry, the AI customer service assistant for {store_name}.
+
+PERSONALITY: Friendly, concise, helpful. Talk like a real shop assistant — warm but efficient. Short replies (1-3 sentences usually). No corporate jargon.
+
+CONVERSATION RULES:
+- ALWAYS use the conversation history. If the customer just gave you an order number after you asked for one, treat the number as their order number — do NOT ask again or change topic.
+- If the customer replies with a short answer (a number, "yes", "no", a colour, a size), interpret it in the context of YOUR previous question.
+- Never repeat the welcome greeting. Never restart the conversation.
+- If asked about refunds/returns: this store offers 30-day returns with a prepaid label by email. Refunds are issued to the original payment method ONCE the item is received back. We don't refund before receiving the item, but reassure the customer the label is fast and the refund is processed within 2 business days of receipt.
+- For order tracking: once the customer gives you an order number, confirm you'll look it up and (in this demo) tell them their order is on the way and will arrive in 2-3 business days.
+- For product questions: be helpful, suggest options, ask clarifying questions about size/colour/budget.
+
+CURRENT TURN INTENT: {intent}{product_block}"""
+
         messages = [
-            {"role": "system", "content": f"You are Jerry for {context.store.name}. Keep it short. Intent: {intent}"},
-            *[m.to_groq_format() for m in context.get_recent_history(5)],
+            {"role": "system", "content": system_prompt},
+            *[m.to_groq_format() for m in context.get_recent_history(12)],
             {"role": "user", "content": message}
         ]
         try:
@@ -311,7 +338,12 @@ class ResponseGenerator:
             with Timer() as t:
                 res = await loop.run_in_executor(
                     None,
-                    lambda: self.client.chat.completions.create(model=self.model, messages=messages),
+                    lambda: self.client.chat.completions.create(
+                        model=self.model,
+                        messages=messages,
+                        temperature=0.3,
+                        max_tokens=400,
+                    ),
                 )
             completion_text = res.choices[0].message.content
 
@@ -378,16 +410,26 @@ class ConversationEngine:
     async def process_message(self, message: str, context: ConversationContext) -> EngineResponse:
 
         # ── STEP 0: WONDERWALL AI FIREWALL (inbound scan) ──
-        # Skip for follow-up replies (already in conversation) or very short data
-        # inputs (order numbers, sizes, colours) — these always score low on
-        # ecommerce similarity but are legitimate mid-conversation responses.
-        _skip_firewall = (
-            context.message_count > 0  # already in conversation
-            or len(message.strip()) <= 20  # short data reply (order #, size, etc.)
-        )
-        if not _skip_firewall and hasattr(self, "firewall_engine") and self.firewall_engine is not None:
+        # Firewall ALWAYS runs — this demo IS the showcase, attackers will
+        # try it. We make it context-aware so short follow-up replies
+        # ("1579", "blue", "yes") aren't blocked by the semantic router
+        # for low topic similarity. The custom sentinel_system_prompt in
+        # main.py handles legitimate-but-rude refund-style messages.
+        if hasattr(self, "firewall_engine") and self.firewall_engine is not None:
             try:
-                verdict = await self.firewall_engine.scan_inbound(message)
+                # Build a context-augmented message for the firewall ONLY
+                # (the LLM still sees the raw message + history). This gives
+                # the semantic router enough signal to recognize follow-ups.
+                _last_assistant = ""
+                for _m in reversed(context.history):
+                    if _m.role == "assistant":
+                        _last_assistant = _m.content
+                        break
+                if _last_assistant and context.message_count > 0:
+                    scan_input = f"Previous bot question: {_last_assistant[:200]}\nCustomer reply: {message}"
+                else:
+                    scan_input = message
+                verdict = await self.firewall_engine.scan_inbound(scan_input)
                 if not verdict.allowed:
                     # Track the blocked attempt for analytics
                     if hasattr(self, "analytics") and self.analytics is not None:
