@@ -132,6 +132,36 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.error(f"Database initialization failed: {e}", exc_info=True)
 
+    # --- STARTUP: Seed demo store ---
+    try:
+        from app.db.engine import get_db
+        from app.db.models import Store
+        from sqlalchemy import select
+        async for db in get_db():
+            result = await db.execute(select(Store).where(Store.shopify_domain == "sunsetbot.myshopify.com"))
+            demo_store = result.scalar_one_or_none()
+            if not demo_store:
+                demo_store = Store(
+                    shopify_domain="sunsetbot.myshopify.com",
+                    access_token="demo_token",
+                    name="Jerry Demo Store",
+                    email="demo@skintlabs.ai",
+                    subscription_status="active",
+                    is_active=True,
+                    jerry_plan="growth",
+                )
+                db.add(demo_store)
+                await db.commit()
+                logger.info("Demo store created: sunsetbot.myshopify.com")
+            elif not demo_store.is_active or demo_store.subscription_status not in ("active", "trialing"):
+                demo_store.is_active = True
+                demo_store.subscription_status = "active"
+                await db.commit()
+                logger.info("Demo store reactivated.")
+            break
+    except Exception as e:
+        logger.error(f"Demo store seed failed: {e}", exc_info=True)
+
        # --- STARTUP: Initialize AI Services (correct order) ---
     try:
         from app.services.product_intelligence import ProductIntelligence
