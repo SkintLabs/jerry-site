@@ -9,7 +9,7 @@
 
 ## Facebook / General Social (Long Form)
 
-My company Skint Labs just finished final iterations on WonderwallAi, the AI firewall SDK we built to protect LLM applications from prompt injection, data leaks, and jailbreak attacks. I genuinely believe it's the most capable AI firewall currently available — 4 security layers, sub-2ms response time, open source.
+My company Skint Labs just finished final iterations on WonderwallAi, the AI firewall SDK we built to protect LLM applications from prompt injection, data leaks, and jailbreak attacks. I genuinely believe it's the most capable AI firewall currently available: 4 security layers, catches 90% of threats locally in under 2ms with zero API calls, open source.
 
 But the firewall was only half the story.
 
@@ -64,7 +64,7 @@ If you're building with LLMs or running a Shopify store, I'd love to hear your t
 **Tweet 1 (Hook):**
 My company @SkintLabs just shipped two AI products:
 
-1. An AI firewall that blocks prompt injection in <2ms
+1. An AI firewall that catches 90% of threats locally in under 2ms, zero API calls
 2. An AI customer service bot for Shopify that logs every decision it makes so you can actually audit it
 
 Here's the story of how building one led to the other:
