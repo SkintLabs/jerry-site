@@ -378,7 +378,14 @@ class ConversationEngine:
     async def process_message(self, message: str, context: ConversationContext) -> EngineResponse:
 
         # ── STEP 0: WONDERWALL AI FIREWALL (inbound scan) ──
-        if hasattr(self, "firewall_engine") and self.firewall_engine is not None:
+        # Skip for follow-up replies (already in conversation) or very short data
+        # inputs (order numbers, sizes, colours) — these always score low on
+        # ecommerce similarity but are legitimate mid-conversation responses.
+        _skip_firewall = (
+            context.message_count > 0  # already in conversation
+            or len(message.strip()) <= 20  # short data reply (order #, size, etc.)
+        )
+        if not _skip_firewall and hasattr(self, "firewall_engine") and self.firewall_engine is not None:
             try:
                 verdict = await self.firewall_engine.scan_inbound(message)
                 if not verdict.allowed:

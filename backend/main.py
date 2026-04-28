@@ -462,9 +462,10 @@ async def websocket_chat(
         context.canary_token = firewall_engine.generate_canary(session_id)
         context.canary_prompt_block = firewall_engine.get_canary_prompt(context.canary_token)
 
-    # --- Send welcome message ---
-    welcome = _build_welcome_message(store_id, session_id)
-    await websocket.send_json(welcome)
+    # --- Send welcome message (only on first connection, not reconnects) ---
+    if context.message_count == 0:
+        welcome = _build_welcome_message(store_id, session_id)
+        await websocket.send_json(welcome)
 
     try:
         while True:
