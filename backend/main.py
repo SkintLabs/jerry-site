@@ -553,20 +553,51 @@ async def websocket_chat(
             turn_number += 1
             bind_context(turn_number=turn_number)
 
-            # --- FIREWALL: Inbound scan ---
+            # --- FIREWALL: Inbound scan (single scan point, context-aware) ---
+            # Context-augmented so short follow-up replies ("1579", "yes",
+            # a colour name) inherit topic similarity from the bot's previous
+            # question rather than scoring near-zero on their own.
             if firewall_engine is not None:
                 try:
+                    _last_bot_msg = ""
+                    for _hm in reversed(context.history):
+                        if _hm.role == "assistant":
+                            _last_bot_msg = _hm.content
+                            break
+                    scan_input = (
+                        f"Previous bot question: {_last_bot_msg[:200]}\nCustomer reply: {user_message}"
+                        if _last_bot_msg and context.message_count > 0
+                        else user_message
+                    )
                     with Timer() as fw_in_t:
-                        verdict = await firewall_engine.scan_inbound(user_message)
+                        verdict = await firewall_engine.scan_inbound(scan_input)
                     log_decision(
                         "firewall_inbound",
                         input_summary=user_message[:100],
                         chosen="blocked" if not verdict.allowed else "allowed",
                         reason=f"blocked_by={verdict.blocked_by}" if not verdict.allowed else "all_layers_passed",
                         latency_ms=fw_in_t.ms,
-                        metadata={"violations": verdict.violations} if verdict.violations else None,
+                        confidence=verdict.scores.get("semantic") if verdict.scores else None,
+                        metadata={
+                            "violations": verdict.violations,
+                            "scores": verdict.scores,
+                            "context_augmented": bool(_last_bot_msg and context.message_count > 0),
+                        } if (verdict.violations or verdict.scores) else {
+                            "context_augmented": bool(_last_bot_msg and context.message_count > 0),
+                        },
                     )
                     if not verdict.allowed:
+                        if analytics_service:
+                            await analytics_service.track_conversation(
+                                store_id=store_id,
+                                session_id=session_id,
+                                message=user_message,
+                                response_text=verdict.message,
+                                intent="firewall_block",
+                                entities={},
+                                products_shown=0,
+                                escalated=False,
+                            )
                         await websocket.send_json({
                             "type": "message",
                             "text": verdict.message,

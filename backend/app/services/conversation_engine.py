@@ -476,49 +476,8 @@ class ConversationEngine:
             await self._redis_manager.delete_async(session_id)
 
     async def process_message(self, message: str, context: ConversationContext) -> EngineResponse:
-
-        # ── STEP 0: WONDERWALL AI FIREWALL (inbound scan) ──
-        # Firewall ALWAYS runs — this demo IS the showcase, attackers will
-        # try it. We make it context-aware so short follow-up replies
-        # ("1579", "blue", "yes") aren't blocked by the semantic router
-        # for low topic similarity. The custom sentinel_system_prompt in
-        # main.py handles legitimate-but-rude refund-style messages.
-        if hasattr(self, "firewall_engine") and self.firewall_engine is not None:
-            try:
-                # Build a context-augmented message for the firewall ONLY
-                # (the LLM still sees the raw message + history). This gives
-                # the semantic router enough signal to recognize follow-ups.
-                _last_assistant = ""
-                for _m in reversed(context.history):
-                    if _m.role == "assistant":
-                        _last_assistant = _m.content
-                        break
-                if _last_assistant and context.message_count > 0:
-                    scan_input = f"Previous bot question: {_last_assistant[:200]}\nCustomer reply: {message}"
-                else:
-                    scan_input = message
-                verdict = await self.firewall_engine.scan_inbound(scan_input)
-                if not verdict.allowed:
-                    # Track the blocked attempt for analytics
-                    if hasattr(self, "analytics") and self.analytics is not None:
-                        await self.analytics.track_conversation(
-                            store_id=context.store_id,
-                            session_id=context.session_id,
-                            message=message,
-                            response_text=verdict.message,
-                            intent="firewall_block",
-                            entities={},
-                            products_shown=0,
-                            escalated=False,
-                        )
-                    return EngineResponse(
-                        text=verdict.message,
-                        intent="firewall_block",
-                        entities={},
-                        session_id=context.session_id,
-                    )
-            except Exception as e:
-                logger.error(f"Firewall inbound error (allowing): {e}")
+        # Firewall scanning is handled in main.py (single scan point, fully
+        # logged). process_message receives only pre-approved messages.
 
         # ── STEP 1: VALIDATION ──
         if len(message) > MAX_MESSAGE_LENGTH:
@@ -553,17 +512,9 @@ class ConversationEngine:
         context.add_message("user", message)
         context.add_message("assistant", response_text)
 
-        # ── STEP 4: OUTBOUND FIREWALL SCAN ──
-        if hasattr(self, "firewall_engine") and self.firewall_engine is not None:
-            try:
-                egress_verdict = await self.firewall_engine.scan_outbound(
-                    response_text, context.canary_token or ""
-                )
-                response_text = egress_verdict.message
-            except Exception as e:
-                logger.error(f"Firewall outbound error (allowing): {e}")
+        # Outbound firewall scan is handled in main.py (single scan point).
 
-        # ── STEP 5: PERSIST CONTEXT TO REDIS (survives redeploys) ──
+        # ── STEP 4: PERSIST CONTEXT TO REDIS (survives redeploys) ──
         await self._save_context(context)
 
         # ── STEP 6: SAVE FULL INTERACTION TO DB ──
