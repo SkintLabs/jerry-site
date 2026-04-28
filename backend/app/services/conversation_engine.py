@@ -383,6 +383,47 @@ class _InMemoryContextManager:
     def set(self, session_id: str, context):
         self._contexts[session_id] = context
 
+
+class _RedisContextManager:
+    """
+    Redis-backed context store — persists conversation history across
+    Railway redeploys and server restarts so Jerry remembers the full
+    chat when a user reconnects mid-conversation.
+
+    Falls back to a fresh context on any Redis error (fail-open).
+    TTL: 24 hours (matching the JWT token lifetime).
+    """
+    TTL = 86_400  # 24 h
+
+    def __init__(self, redis_url: str):
+        import redis.asyncio as aioredis
+        self._redis = aioredis.from_url(redis_url, decode_responses=True)
+        self._prefix = "jerry:ctx:"
+
+    def _key(self, session_id: str) -> str:
+        return f"{self._prefix}{session_id}"
+
+    async def get_async(self, session_id: str):
+        try:
+            raw = await self._redis.get(self._key(session_id))
+            if raw:
+                return ConversationContext.from_json(raw)
+        except Exception as e:
+            logger.warning(f"Redis context get failed (using fresh context): {e}")
+        return None
+
+    async def set_async(self, session_id: str, context: "ConversationContext"):
+        try:
+            await self._redis.setex(self._key(session_id), self.TTL, context.to_json())
+        except Exception as e:
+            logger.warning(f"Redis context set failed: {e}")
+
+    async def delete_async(self, session_id: str):
+        try:
+            await self._redis.delete(self._key(session_id))
+        except Exception as e:
+            logger.warning(f"Redis context delete failed: {e}")
+
 # ============================================================================
 # CONVERSATION ENGINE — THE MAIN ORCHESTRATOR
 # ============================================================================
@@ -394,18 +435,45 @@ class ConversationEngine:
         self.response_generator = ResponseGenerator()
         self.escalation_handler = EscalationHandler()
         self._product_intelligence = _MockProductIntelligence()
-        self._context_manager = _InMemoryContextManager()
+        # Try Redis first; fall back to in-memory
+        redis_url = os.getenv("REDIS_URL", "")
+        if redis_url:
+            try:
+                self._redis_manager = _RedisContextManager(redis_url)
+                self._context_manager = _InMemoryContextManager()  # local cache
+                logger.info("ConversationEngine: Redis context store active")
+            except Exception as e:
+                logger.warning(f"Redis context store unavailable, using in-memory: {e}")
+                self._redis_manager = None
+                self._context_manager = _InMemoryContextManager()
+        else:
+            self._redis_manager = None
+            self._context_manager = _InMemoryContextManager()
 
     async def get_or_create_context(self, session_id: str, store_id: str) -> ConversationContext:
+        # Check local cache first (fast path)
         existing = self._context_manager.get(session_id)
         if existing:
             return existing
+        # Try Redis (survives redeploys)
+        if self._redis_manager:
+            existing = await self._redis_manager.get_async(session_id)
+            if existing:
+                self._context_manager.set(session_id, existing)
+                return existing
         context = ConversationContext(session_id=session_id, store_id=store_id)
         self._context_manager.set(session_id, context)
         return context
 
+    async def _save_context(self, context: ConversationContext) -> None:
+        """Persist context to Redis after each message."""
+        if self._redis_manager:
+            await self._redis_manager.set_async(context.session_id, context)
+
     async def end_session(self, session_id: str) -> None:
         self._context_manager._contexts.pop(session_id, None)
+        if self._redis_manager:
+            await self._redis_manager.delete_async(session_id)
 
     async def process_message(self, message: str, context: ConversationContext) -> EngineResponse:
 
@@ -495,7 +563,10 @@ class ConversationEngine:
             except Exception as e:
                 logger.error(f"Firewall outbound error (allowing): {e}")
 
-        # ── STEP 5: SAVE FULL INTERACTION TO DB ──
+        # ── STEP 5: PERSIST CONTEXT TO REDIS (survives redeploys) ──
+        await self._save_context(context)
+
+        # ── STEP 6: SAVE FULL INTERACTION TO DB ──
         if hasattr(self, "analytics") and self.analytics is not None:
             await self.analytics.track_conversation(
                 store_id=context.store_id,
