@@ -59,6 +59,10 @@
             0%, 100% { box-shadow: 0 12px 40px var(--primary-glow); }
             50%       { box-shadow: 0 16px 56px var(--primary-glow-strong); }
         }
+        @keyframes navLogoPulse {
+            0%, 100% { text-shadow: 0 0 10px rgba(193,102,107,0.4), 0 0 24px rgba(193,102,107,0.15); }
+            50%       { text-shadow: 0 0 18px rgba(212,160,64,0.6), 0 0 40px rgba(212,160,64,0.25); }
+        }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html { scroll-behavior: smooth; overflow-x: hidden; }
@@ -93,7 +97,7 @@
             border-bottom: 1px solid var(--border);
         }
         nav .container { display: flex; justify-content: space-between; align-items: center; height: 64px; }
-        .logo { font-size: 1.4rem; font-weight: 400; letter-spacing: 0.02em; }
+        .logo { font-size: 1.4rem; font-weight: 400; letter-spacing: 0.02em; animation: navLogoPulse 4s ease-in-out infinite; }
         .logo .logo-jerry {
             font-family: 'Remarcle', sans-serif;
             font-size: 1.7rem;
@@ -102,7 +106,6 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            animation: logoGlow 3s ease-in-out infinite;
             /* fallback for no -webkit-text-fill-color support: */
             display: inline-block;
         }
@@ -350,11 +353,18 @@
         }
         .cap-visual {
             background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
-            padding: 32px; position: relative; overflow: hidden;
+            padding: 32px; position: relative; overflow: hidden; transition: all 0.3s;
         }
         .cap-visual::before {
             content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-            background: var(--gradient-warm);
+            background: var(--gradient-warm); opacity: 1; transition: opacity 0.3s;
+        }
+        .cap-visual:hover {
+            border-color: var(--primary); transform: translateY(-3px);
+            box-shadow: 0 8px 32px var(--primary-glow);
+        }
+        .cap-visual:hover::before {
+            opacity: 1;
         }
         .cap-visual-label {
             font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em;
@@ -449,12 +459,19 @@
         }
         .price-card {
             background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: 16px; padding: 36px; position: relative; transition: transform 0.2s;
+            border-radius: 16px; padding: 36px; position: relative; transition: all 0.3s; overflow: hidden;
+        }
+        .price-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            background: var(--gradient-warm); opacity: 0; transition: opacity 0.3s;
         }
         .price-card:hover {
-            transform: translateY(-4px);
-            border-color: rgba(193, 102, 107, 0.45);
-            box-shadow: 0 16px 56px var(--primary-glow-strong);
+            transform: translateY(-3px);
+            border-color: var(--primary);
+            box-shadow: 0 8px 32px var(--primary-glow);
+        }
+        .price-card:hover::before {
+            opacity: 1;
         }
         .price-card.featured {
             border-color: var(--primary);
