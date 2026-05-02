@@ -25,28 +25,28 @@
         @font-face { font-family: 'FluxDemo';  src: url('assets/fonts/FluxDemo.ttf') format('truetype'); }
 
         :root {
-            --mustard: #d4a040;
-            --terracotta: #c1666b;
-            --warm-beige: #e2dbd0;
-            --chocolate: #4a4032;
+            --mustard: #d9a840;
+            --terracotta: #c86a65;
+            --warm-beige: #e8e0d2;
+            --chocolate: #4e4235;
             --bg: #0a0908;
             --bg-subtle: #110f0d;
-            --bg-card: #181614;
-            --bg-card-hover: #221f1c;
-            --border: #2a2520;
-            --border-hover: #3a3428;
-            --text: #c8bfb2;
-            --text-secondary: #a89e90;
-            --text-muted: #7a7268;
-            --text-bright: #ede8e0;
-            --primary: #c1666b;
-            --primary-hover: #d07478;
-            --primary-glow: rgba(193, 102, 107, 0.18);
-            --primary-glow-strong: rgba(193, 102, 107, 0.35);
-            --accent: #d4a040;
-            --accent-hover: #e0b050;
-            --gradient-warm: linear-gradient(135deg, #c1666b 0%, #d4a040 100%);
-            --gradient-text: linear-gradient(135deg, #c1666b 0%, #d4a040 50%, #e9c46a 100%);
+            --bg-card: #191714;
+            --bg-card-hover: #231f1b;
+            --border: #2e2822;
+            --border-hover: #3e3628;
+            --text: #cdc4b5;
+            --text-secondary: #ada396;
+            --text-muted: #7d7368;
+            --text-bright: #f0ebe1;
+            --primary: #c86a65;
+            --primary-hover: #d47870;
+            --primary-glow: rgba(200, 106, 101, 0.18);
+            --primary-glow-strong: rgba(200, 106, 101, 0.36);
+            --accent: #d9a840;
+            --accent-hover: #e6b850;
+            --gradient-warm: linear-gradient(135deg, #c86a65 0%, #d9a840 100%);
+            --gradient-text: linear-gradient(135deg, #c86a65 0%, #e09040 50%, #ecc860 100%);
         }
 
         @keyframes heroPulse {
@@ -54,8 +54,8 @@
             50%       { opacity: 0.75; transform: translateX(-50%) scale(1.08); }
         }
         @keyframes logoGlow {
-            0%, 100% { text-shadow: 0 0 14px rgba(193,102,107,0.5), 0 0 32px rgba(193,102,107,0.3); }
-            50%       { text-shadow: 0 0 22px rgba(193,102,107,0.8), 0 0 55px rgba(193,102,107,0.5), 0 0 80px rgba(212,160,64,0.2); }
+            0%, 100% { text-shadow: 0 0 14px rgba(232,168,78,0.5), 0 0 32px rgba(232,168,78,0.25); }
+            50%       { text-shadow: 0 0 24px rgba(232,168,78,0.8), 0 0 52px rgba(232,168,78,0.45), 0 0 80px rgba(193,102,107,0.2); }
         }
         @keyframes cardPulse {
             0%, 100% { box-shadow: 0 12px 40px var(--primary-glow); }
@@ -99,19 +99,25 @@
             border-bottom: 1px solid var(--border);
         }
         nav .container { display: flex; justify-content: space-between; align-items: center; height: 64px; }
-        .logo { font-size: 1.4rem; font-weight: 400; letter-spacing: 0.02em; animation: navLogoPulse 4s ease-in-out infinite; }
+        .logo { font-size: 1.4rem; font-weight: 400; letter-spacing: 0.02em; display: flex; align-items: baseline; }
         .logo .logo-jerry {
             font-family: 'Remarcle', sans-serif;
-            font-size: 1.7rem;
+            font-size: 2.1rem;
             letter-spacing: 0.06em;
-            background: var(--gradient-text);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            /* fallback for no -webkit-text-fill-color support: */
+            color: #e8a84e;
+            -webkit-text-fill-color: #e8a84e;
+            animation: logoGlow 3.5s ease-in-out infinite;
             display: inline-block;
         }
-        .logo .logo-sub { font-family: 'Decofun', sans-serif; color: #c4918d; font-size: 0.52em; font-weight: 400; letter-spacing: 0.05em; }
+        .logo .logo-sub {
+            font-family: 'Decofun', sans-serif;
+            color: #b08a72;
+            font-size: 0.68rem;
+            font-weight: 400;
+            letter-spacing: 0.07em;
+            padding-left: 7px;
+            align-self: center;
+        }
         .nav-brand {
             display: flex;
             align-items: center;
@@ -120,17 +126,15 @@
         .skint-badge {
             display: inline-flex;
             align-items: center;
-            padding: 4px 8px;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            transition: all 0.2s;
+            padding: 0;
+            border: none;
+            border-radius: 0;
+            transition: opacity 0.2s;
             text-decoration: none;
+            opacity: 0.5;
         }
-        .skint-badge:hover {
-            border-color: var(--accent);
-            opacity: 1 !important;
-            border-color: var(--accent);
-        }
+        .skint-badge:hover { opacity: 0.85; }
+        .skint-badge img { filter: grayscale(1) brightness(0.85); }
         .nav-links { display: flex; gap: 28px; align-items: center; }
         .nav-links a { font-family: 'RetroByte', sans-serif; color: var(--text-secondary); font-size: 0.85rem; font-weight: 400; letter-spacing: 0.06em; }
         .nav-links a:hover { color: var(--text-bright); }
@@ -175,15 +179,18 @@
         }
         .hero-text h1 {
             font-family: 'FluxDemo', sans-serif;
-            font-size: clamp(2.6rem, 5.5vw, 4rem);
+            font-size: clamp(2.7rem, 5.5vw, 4.1rem);
             text-transform: uppercase;
-            letter-spacing: 0.04em;
-            font-weight: 400; line-height: 1.1; margin-bottom: 20px;
+            letter-spacing: 0.05em;
+            font-weight: 400; line-height: 1.08; margin-bottom: 22px;
             color: var(--warm-beige);
         }
         .hero-text .jerry-name {
             font-family: 'Remarcle', sans-serif;
-            color: var(--accent);
+            font-size: 1.2em;
+            color: #e8a84e;
+            -webkit-text-fill-color: #e8a84e;
+            letter-spacing: 0.06em;
         }
         .hero-text .gradient-text {
             background: var(--gradient-text);
@@ -295,29 +302,29 @@
         .stat-num {
             font-family: 'Inter', sans-serif;
             font-weight: 800;
-            font-size: 2.6rem; color: var(--accent);
-            line-height: 1; margin-bottom: 6px;
+            font-size: 2.9rem; color: var(--accent);
+            line-height: 1; margin-bottom: 8px;
         }
         .stat-label {
-            font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;
-            letter-spacing: 0.12em; font-weight: 600;
+            font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase;
+            letter-spacing: 0.14em; font-weight: 600;
         }
 
         /* ── SECTIONS ── */
         section { padding: 100px 0; }
         .section-label {
-            font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.15em;
-            color: var(--primary); font-weight: 600; margin-bottom: 12px;
+            font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.18em;
+            color: var(--primary); font-weight: 600; margin-bottom: 14px;
         }
         h2 {
             font-family: 'FluxDemo', sans-serif;
-            font-size: clamp(2.2rem, 4.5vw, 3.4rem);
+            font-size: clamp(2.4rem, 4.8vw, 3.6rem);
             text-transform: uppercase;
-            letter-spacing: 0.04em;
-            font-weight: 400; line-height: 1.1; margin-bottom: 16px;
+            letter-spacing: 0.05em;
+            font-weight: 400; line-height: 1.08; margin-bottom: 18px;
         }
         .section-desc {
-            font-size: 1.1rem; color: var(--text-secondary); max-width: 600px; line-height: 1.7;
+            font-size: 1.05rem; color: var(--text-secondary); max-width: 600px; line-height: 1.78;
         }
 
         /* ── CAPABILITIES — alternating rows (distinct from card grid) ── */
@@ -625,8 +632,8 @@
         @media (max-width: 768px) {
             .nav-links a:not(.nav-cta) { display: none; }
             .nav-cta { padding: 6px 16px; font-size: 0.78rem; }
-            .logo { font-size: 1.1rem; }
-            .logo .logo-sub { font-size: 0.6em; }
+            .logo .logo-jerry { font-size: 1.6rem; }
+            .logo .logo-sub { font-size: 0.6rem; }
             .stats-inner { grid-template-columns: repeat(2, 1fr); }
             .stat-block { padding: 20px 16px; }
             .stat-block::after { display: none; }
@@ -653,7 +660,7 @@
                 <div class="logo">
                     <span class="logo-jerry">Jerry</span> <span class="logo-sub">The Customer Service Bot</span>
                 </div>
-                <a href="https://skintlabs.ai" class="skint-badge" target="_blank" rel="noopener"><img src="assets/headers/SkintLabs_PAC_space_transparent_colored.png" alt="Skint Labs" style="height:18px;width:auto;display:block;opacity:0.85;"></a>
+                <a href="https://skintlabs.ai" class="skint-badge" target="_blank" rel="noopener"><img src="assets/headers/SkintLabs_PAC_space_transparent_colored.png" alt="Skint Labs" style="height:22px;width:auto;display:block;"></a>
             </div>
             <div class="nav-links">
                 <a href="#capabilities">Capabilities</a>
