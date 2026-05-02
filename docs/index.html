@@ -21,7 +21,6 @@
         @font-face { font-family: 'LemonSmash'; src: url('assets/fonts/LemonSmash-Regular.otf') format('opentype'); }
         @font-face { font-family: 'DeathStar';  src: url('assets/fonts/Death Star.otf') format('opentype'); }
         @font-face { font-family: 'RetroByte'; src: url('assets/fonts/RetroByte.ttf') format('truetype'); }
-        @font-face { font-family: 'GoldenGirdle'; src: url('assets/fonts/Golden Girdle.otf') format('opentype'); }
 
         :root {
             --mustard: #d4a040;
@@ -173,18 +172,11 @@
             align-items: center;
         }
         .hero-text h1 {
+            font-family: 'LemonSmash', sans-serif;
             font-size: clamp(2.6rem, 5.5vw, 4rem);
+            text-transform: uppercase;
             letter-spacing: 0.04em;
             font-weight: 400; line-height: 1.1; margin-bottom: 20px;
-            color: #e2dbd0;
-        }
-        .hero-text h1 .jerry-name {
-            font-family: 'Remarcle', sans-serif;
-        }
-        .hero-text h1 .customer-service {
-            font-family: 'GoldenGirdle', sans-serif;
-            font-size: 0.75em;
-            color: #c1666b;
         }
         .hero-text .gradient-text {
             background: var(--gradient-text);
@@ -659,7 +651,7 @@
             <div class="hero-grid fade-in">
                 <div class="hero-text">
                     <h1>
-                        <span class="jerry-name gradient-text">Jerry</span> <span class="customer-service">the Customer Service Bot</span>
+                        Meet <span class="gradient-text">Jerry The Customer Service Bot</span>
                     </h1>
                     <p>
                         The AI assistant that knows every product in your Shopify store, tracks every order,
