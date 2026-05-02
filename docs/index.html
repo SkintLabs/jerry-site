@@ -15,8 +15,18 @@
     <meta name="twitter:image" content="https://jerry.skintlabs.ai/og-image.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
+        @font-face { font-family: 'Remarcle';       src: url('assets/fonts/Remarcle.ttf') format('truetype'); }
+        @font-face { font-family: 'RoturaVintage';  src: url('assets/fonts/RoturaVintageDemo-Regular.otf') format('opentype'); }
+        @font-face { font-family: 'BecomeCritical'; src: url('assets/fonts/BECOME CRITICAL DEMO.ttf') format('truetype'); }
+        @font-face { font-family: 'Kamikaze';       src: url('assets/fonts/Kamikaze.ttf') format('truetype'); }
+        @font-face { font-family: 'MarginDemo';       src: url('assets/fonts/Margin DEMO.otf') format('opentype'); }
+        @font-face { font-family: 'KamikazeItalic';    src: url('assets/fonts/Kamikaze-Italic.ttf') format('truetype'); }
+        @font-face { font-family: 'Kamikaze3DItalic';  src: url('assets/fonts/Kamikaze3DGradient-Italic.ttf') format('truetype'); }
+        @font-face { font-family: 'LemonSmash';        src: url('assets/fonts/LemonSmash-Regular.otf') format('opentype'); }
+        @font-face { font-family: 'SprintRunner';      src: url('assets/fonts/SprintRunnerDemoRegular.ttf') format('truetype'); }
+        @font-face { font-family: 'StanderDemo';     src: url('assets/fonts/Stander DEMO.otf') format('opentype'); }
         :root {
             --mustard: #d4a040;
             --terracotta: #c1666b;
@@ -53,8 +63,10 @@
             width: 100%;
         }
         h1, h2, h3 {
-            font-family: 'Noto Serif', Georgia, serif;
-            color: var(--text-bright);
+            font-family: 'LemonSmash', Georgia, serif;
+            color: #cfc0ad;
+            font-weight: 400;
+            text-transform: uppercase;
         }
         a { color: var(--primary); text-decoration: none; transition: color 0.2s; }
         a:hover { color: var(--primary-hover); }
@@ -71,9 +83,9 @@
             border-bottom: 1px solid var(--border);
         }
         nav .container { display: flex; justify-content: space-between; align-items: center; height: 64px; }
-        .logo { font-family: 'Noto Serif', Georgia, serif; font-size: 1.3rem; font-weight: 900; letter-spacing: -0.02em; }
+        .logo { font-family: 'Remarcle', Georgia, serif; font-size: 1.4rem; font-weight: 400; letter-spacing: 0.01em; }
         .logo .logo-jerry { color: var(--accent); }
-        .logo .logo-sub { color: var(--primary); font-size: 0.65em; font-weight: 700; }
+        .logo .logo-sub { color: var(--primary); font-size: 0.6em; font-weight: 400; letter-spacing: 0.04em; }
         .nav-brand {
             display: flex;
             align-items: center;
@@ -199,7 +211,7 @@
             padding: 12px; max-width: 85%;
         }
         .msg-product-name { font-size: 0.85rem; font-weight: 600; color: var(--text-bright); }
-        .msg-product-price { font-size: 0.9rem; color: var(--accent); font-weight: 700; font-family: 'Noto Serif', serif; }
+        .msg-product-price { font-size: 0.9rem; color: var(--accent); font-weight: 700; font-family: 'RoturaVintage', serif; }
         .msg-product-desc { font-size: 0.78rem; color: var(--text-muted); margin-top: 4px; }
         .chat-input-bar {
             padding: 12px 16px; border-top: 1px solid var(--border);
@@ -238,7 +250,7 @@
         }
         .stat-block:last-child::after { display: none; }
         .stat-num {
-            font-family: 'Noto Serif', Georgia, serif;
+            font-family: 'RoturaVintage', Georgia, serif;
             font-size: 2.4rem; font-weight: 900; color: var(--accent);
             line-height: 1; margin-bottom: 6px;
         }
@@ -351,7 +363,7 @@
             background: var(--bg-card); border: 2px solid var(--primary);
             display: flex; align-items: center; justify-content: center;
             margin: 0 auto 20px; position: relative; z-index: 1;
-            font-family: 'Noto Serif', Georgia, serif; font-size: 1.2rem; font-weight: 900;
+            font-family: 'RoturaVintage', Georgia, serif; font-size: 1.2rem; font-weight: 900;
             color: var(--accent);
         }
         .tl-step h3 { font-size: 1.1rem; margin-bottom: 8px; }
@@ -394,10 +406,10 @@
             border-color: var(--primary);
             box-shadow: 0 0 40px var(--primary-glow);
         }
-        .price-name { font-family: 'Noto Serif', Georgia, serif; font-size: 1.3rem; font-weight: 700; margin-bottom: 4px; }
+        .price-name { font-family: 'RoturaVintage', Georgia, serif; font-size: 1.3rem; font-weight: 700; margin-bottom: 4px; }
         .price-desc { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px; }
         .price-amount {
-            font-family: 'Noto Serif', Georgia, serif;
+            font-family: 'RoturaVintage', Georgia, serif;
             font-size: 3.2rem; font-weight: 900; color: #ffffff;
         }
         .price-amount span { font-size: 1rem; color: var(--text-muted); font-weight: 400; }
@@ -449,7 +461,7 @@
         .early-bird-text span { color: var(--text-secondary); font-size: 0.9rem; }
         .early-bird-counter { text-align: center; min-width: 80px; }
         .early-bird-count {
-            font-family: 'Noto Serif', Georgia, serif;
+            font-family: 'RoturaVintage', Georgia, serif;
             font-size: 2.5rem;
             font-weight: 900;
             color: var(--accent);
@@ -502,6 +514,22 @@
         .footer-links a:hover { color: var(--text); }
         .footer-copy { font-size: 0.8rem; color: var(--text-muted); }
         .footer-shield { font-size: 0.75rem; color: var(--terracotta); display: flex; align-items: center; gap: 6px; }
+        .skint-footer-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.68rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #7aab9e;
+            text-decoration: none;
+            margin-top: 10px;
+            opacity: 0.75;
+            transition: opacity 0.2s;
+        }
+        .skint-footer-badge:hover { opacity: 1; color: #7aab9e; }
 
         /* ── MOBILE ── */
         @media (max-width: 900px) {
@@ -555,7 +583,6 @@
                 <div class="logo">
                     <span class="logo-jerry">Jerry</span> <span class="logo-sub">The Customer Service Bot</span>
                 </div>
-                <a href="https://skintlabs.ai" target="_blank" rel="noopener"><img src="assets/headers/SkintLabs_PAC_space_transparent_colored.png" alt="Skint Labs" style="height: 28px; width: auto;"></a>
             </div>
             <div class="nav-links">
                 <a href="#capabilities">Capabilities</a>
@@ -775,19 +802,19 @@
                     <div class="cap-visual-label">Dashboard Preview</div>
                     <div class="cap-example" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%;">
                         <div style="background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center;">
-                            <div style="font-family: 'Noto Serif', serif; font-size: 1.6rem; font-weight: 900; color: var(--accent);">847</div>
+                            <div style="font-family: 'RoturaVintage', serif; font-size: 1.6rem; font-weight: 900; color: var(--accent);">847</div>
                             <div style="font-size: 0.72rem; color: var(--text-muted);">Conversations</div>
                         </div>
                         <div style="background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center;">
-                            <div style="font-family: 'Noto Serif', serif; font-size: 1.6rem; font-weight: 900; color: var(--accent);">94%</div>
+                            <div style="font-family: 'RoturaVintage', serif; font-size: 1.6rem; font-weight: 900; color: var(--accent);">94%</div>
                             <div style="font-size: 0.72rem; color: var(--text-muted);">Resolved</div>
                         </div>
                         <div style="background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center;">
-                            <div style="font-family: 'Noto Serif', serif; font-size: 1.6rem; font-weight: 900; color: var(--accent);">$12.4k</div>
+                            <div style="font-family: 'RoturaVintage', serif; font-size: 1.6rem; font-weight: 900; color: var(--accent);">$12.4k</div>
                             <div style="font-size: 0.72rem; color: var(--text-muted);">Revenue Attributed</div>
                         </div>
                         <div style="background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center;">
-                            <div style="font-family: 'Noto Serif', serif; font-size: 1.6rem; font-weight: 900; color: var(--accent);">1.8s</div>
+                            <div style="font-family: 'RoturaVintage', serif; font-size: 1.6rem; font-weight: 900; color: var(--accent);">1.8s</div>
                             <div style="font-size: 0.72rem; color: var(--text-muted);">Avg Response</div>
                         </div>
                     </div>
@@ -1044,7 +1071,8 @@
                     <div class="logo" style="margin-bottom: 8px;">
                         <span class="logo-jerry">Jerry</span> <span class="logo-sub">The Customer Service Bot</span>
                     </div>
-                    <div class="footer-copy">&copy; 2026 Jerry The Customer Service Bot &middot; A <a href="https://skintlabs.ai" style="color: var(--accent);">Skint Labs</a> Product</div>
+                    <div class="footer-copy">&copy; 2026 Jerry The Customer Service Bot</div>
+                    <a href="https://skintlabs.ai" target="_blank" rel="noopener" class="skint-footer-badge">&#9632; A Skint Labs Product</a>
                 </div>
                 <div class="footer-links">
                     <a href="#capabilities">Capabilities</a>
