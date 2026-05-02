@@ -20,6 +20,7 @@
         @font-face { font-family: 'Remarcle';   src: url('assets/fonts/Remarcle.ttf') format('truetype'); }
         @font-face { font-family: 'LemonSmash'; src: url('assets/fonts/LemonSmash-Regular.otf') format('opentype'); }
         @font-face { font-family: 'DeathStar';  src: url('assets/fonts/Death Star.otf') format('opentype'); }
+        @font-face { font-family: 'RetroByte'; src: url('assets/fonts/RetroByte.ttf') format('truetype'); }
 
         :root {
             --mustard: #d4a040;
@@ -129,8 +130,7 @@
             border-color: var(--accent);
         }
         .nav-links { display: flex; gap: 28px; align-items: center; }
-        /* NAV FONT — swap font-family here once chosen */
-        .nav-links a { color: var(--text-secondary); font-size: 0.9rem; font-weight: 500; letter-spacing: 0.03em; }
+        .nav-links a { font-family: 'RetroByte', sans-serif; color: var(--text-secondary); font-size: 0.85rem; font-weight: 400; letter-spacing: 0.06em; }
         .nav-links a:hover { color: var(--text-bright); }
         .nav-cta {
             background: var(--primary) !important; color: var(--text-bright) !important;
