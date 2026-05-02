@@ -6,13 +6,17 @@
     <title>Jerry The Customer Service Bot — Live Demo</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        @font-face { font-family: 'Remarcle';   src: url('/assets/fonts/Remarcle.ttf') format('truetype'); }
+        @font-face { font-family: 'LemonSmash'; src: url('/assets/fonts/LemonSmash-Regular.otf') format('opentype'); }
+        @font-face { font-family: 'RetroByte';  src: url('/assets/fonts/RetroByte.ttf') format('truetype'); }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: #0c0b0a;
-            color: #d4b896;
+            color: #c8bfb2;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -24,26 +28,34 @@
             max-width: 600px;
         }
         .demo-container h1 {
-            font-family: 'Noto Serif', Georgia, serif;
+            font-family: 'LemonSmash', 'Inter', sans-serif;
             font-size: clamp(2rem, 5vw, 3rem);
-            font-weight: 900;
-            color: #ede8e0;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #f0ebe4;
             margin-bottom: 16px;
         }
         .demo-container h1 .jerry {
+            font-family: 'Remarcle', sans-serif;
             background: linear-gradient(135deg, #c1666b 0%, #d4a040 50%, #e9c46a 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            animation: logoGlow 3s ease-in-out infinite;
+        }
+        @keyframes logoGlow {
+            0%, 100% { filter: drop-shadow(0 0 12px rgba(193,102,107,0.25)); }
+            50%       { filter: drop-shadow(0 0 24px rgba(193,102,107,0.45)); }
         }
         .demo-container p {
-            color: #c4a882;
+            color: #c8bfb2;
             font-size: 1.1rem;
             line-height: 1.6;
             margin-bottom: 12px;
         }
         .demo-container p.subtle {
-            color: #8a7d6e;
+            color: #7a7268;
             font-size: 0.9rem;
         }
 
@@ -55,12 +67,14 @@
             margin-top: 40px;
             padding: 20px 40px;
             background: #c1666b;
-            color: #ede8e0;
+            color: #f0ebe4;
             border: none;
             border-radius: 100px;
-            font-family: 'Inter', sans-serif;
+            font-family: 'LemonSmash', 'Inter', sans-serif;
             font-size: 1.2rem;
-            font-weight: 600;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
             cursor: pointer;
             transition: all 0.3s ease;
             animation: cta-pulse 2s ease-in-out infinite;
@@ -90,7 +104,7 @@
         .suggestion {
             background: #1c1a17;
             border: 1px solid #2e2a25;
-            color: #c4a882;
+            color: #c8bfb2;
             padding: 10px 18px;
             border-radius: 100px;
             font-size: 0.85rem;
@@ -99,7 +113,7 @@
         }
         .suggestion:hover {
             border-color: #c1666b;
-            color: #ede8e0;
+            color: #f0ebe4;
         }
 
         .cta-section {
@@ -110,14 +124,16 @@
             border-radius: 20px;
         }
         .cta-section h2 {
-            font-family: 'Noto Serif', Georgia, serif;
+            font-family: 'LemonSmash', 'Inter', sans-serif;
             font-size: 1.3rem;
-            font-weight: 700;
-            color: #ede8e0;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #f0ebe4;
             margin-bottom: 8px;
         }
         .cta-section p {
-            color: #8a7d6e;
+            color: #7a7268;
             font-size: 0.9rem;
             margin-bottom: 20px;
         }
@@ -131,10 +147,12 @@
             display: inline-block;
             padding: 14px 28px;
             background: #c1666b;
-            color: #ede8e0;
+            color: #f0ebe4;
             border-radius: 100px;
+            font-family: 'RetroByte', 'Inter', sans-serif;
             font-size: 0.95rem;
-            font-weight: 600;
+            font-weight: 400;
+            letter-spacing: 0.04em;
             text-decoration: none;
             transition: all 0.2s ease;
         }
@@ -150,8 +168,10 @@
             color: #d4a040;
             border: 1px solid #d4a040;
             border-radius: 100px;
+            font-family: 'RetroByte', 'Inter', sans-serif;
             font-size: 0.95rem;
-            font-weight: 600;
+            font-weight: 400;
+            letter-spacing: 0.04em;
             text-decoration: none;
             transition: all 0.2s ease;
         }
@@ -162,8 +182,10 @@
 
         .powered-by {
             margin-top: 24px;
-            color: #8a7d6e;
+            font-family: 'RetroByte', 'Inter', sans-serif;
+            color: #7a7268;
             font-size: 0.8rem;
+            letter-spacing: 0.04em;
         }
         .powered-by a {
             color: #d4a040;
@@ -172,9 +194,6 @@
         .powered-by a:hover {
             color: #e0b050;
         }
-
-        /* Hide the widget bubble since we have the CTA */
-        /* The widget will still open when bubble is clicked */
 
         @media (max-width: 600px) {
             .demo-container { padding: 32px 16px; }
@@ -208,7 +227,7 @@
 
         <div class="cta-section">
             <h2>Want Jerry on your Shopify store?</h2>
-            <p>Plans from $49/mo. Every plan includes a <strong style="color:#ede8e0;">7-day free trial</strong> — no charge until day 8.</p>
+            <p>Plans from $49/mo. Every plan includes a <strong style="color:#f0ebe4;">7-day free trial</strong> — no charge until day 8.</p>
             <div class="cta-buttons">
                 <a href="https://jerry.skintlabs.ai#pricing" class="cta-btn-primary">Start 7-Day Free Trial</a>
                 <a href="https://skintlabs.ai" class="cta-btn-secondary">About Skint Labs</a>
@@ -220,12 +239,7 @@
         </div>
     </div>
 
-    <!--
-        THIS IS ALL A STORE OWNER NEEDS TO ADD:
-        One script tag with their shop domain and server URL.
-    -->
     <script>
-        // Load the Jerry widget
         (function() {
             var script = document.createElement('script');
             script.src = '/static/sunsetbot-widget.iife.js';
@@ -235,14 +249,9 @@
             script.setAttribute('data-tts', 'on');
             document.body.appendChild(script);
 
-            // When the CTA button is clicked, find and click the widget bubble
             document.getElementById('open-chat').addEventListener('click', function() {
-                // Wait a moment for widget to load, then click the bubble
                 var tryClick = function(attempts) {
                     if (attempts <= 0) return;
-                    // The widget renders in a shadow DOM — find the host element
-                    var hosts = document.querySelectorAll('[id^="sunsetbot"], [class*="sunsetbot"], div[style]');
-                    // Try finding the bubble via shadow DOM
                     var allElements = document.querySelectorAll('*');
                     for (var i = 0; i < allElements.length; i++) {
                         var sr = allElements[i].shadowRoot;
