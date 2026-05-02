@@ -21,22 +21,23 @@
         @font-face { font-family: 'LemonSmash'; src: url('assets/fonts/LemonSmash-Regular.otf') format('opentype'); }
         @font-face { font-family: 'DeathStar';  src: url('assets/fonts/Death Star.otf') format('opentype'); }
         @font-face { font-family: 'RetroByte'; src: url('assets/fonts/RetroByte.ttf') format('truetype'); }
+        @font-face { font-family: 'FluxDemo';  src: url('assets/fonts/FluxDemo.ttf') format('truetype'); }
 
         :root {
             --mustard: #d4a040;
             --terracotta: #c1666b;
             --warm-beige: #e2dbd0;
             --chocolate: #4a4032;
-            --bg: #0c0b0a;
-            --bg-subtle: #141210;
-            --bg-card: #1c1a17;
-            --bg-card-hover: #252320;
-            --border: #2e2a25;
-            --border-hover: #3d3830;
-            --text: #ddd6ca;
-            --text-secondary: #c8bfb2;
-            --text-muted: #8a7d6e;
-            --text-bright: #f0ebe4;
+            --bg: #0a0908;
+            --bg-subtle: #110f0d;
+            --bg-card: #181614;
+            --bg-card-hover: #221f1c;
+            --border: #2a2520;
+            --border-hover: #3a3428;
+            --text: #c8bfb2;
+            --text-secondary: #a89e90;
+            --text-muted: #7a7268;
+            --text-bright: #ede8e0;
             --primary: #c1666b;
             --primary-hover: #d07478;
             --primary-glow: rgba(193, 102, 107, 0.18);
@@ -77,10 +78,10 @@
             width: 100%;
         }
         h1, h2, h3 {
-            font-family: 'LemonSmash', 'Inter', sans-serif;
+            font-family: 'FluxDemo', 'Inter', sans-serif;
             text-transform: uppercase;
-            letter-spacing: 0.04em;
-            color: var(--text-bright);
+            letter-spacing: 0.06em;
+            color: var(--warm-beige);
         }
         a { color: var(--primary); text-decoration: none; transition: color 0.2s; }
         a:hover { color: var(--primary-hover); }
@@ -175,7 +176,7 @@
             align-items: center;
         }
         .hero-text h1 {
-            font-family: 'LemonSmash', sans-serif;
+            font-family: 'FluxDemo', sans-serif;
             font-size: clamp(2.6rem, 5.5vw, 4rem);
             text-transform: uppercase;
             letter-spacing: 0.04em;
@@ -311,7 +312,7 @@
             color: var(--primary); font-weight: 600; margin-bottom: 12px;
         }
         h2 {
-            font-family: 'LemonSmash', sans-serif;
+            font-family: 'FluxDemo', sans-serif;
             font-size: clamp(2.2rem, 4.5vw, 3.4rem);
             text-transform: uppercase;
             letter-spacing: 0.04em;
@@ -335,7 +336,7 @@
             padding: 0 0 0 12px; border-left: 3px solid var(--accent); margin-bottom: 16px;
         }
         .cap-content h3 {
-            font-family: 'LemonSmash', sans-serif;
+            font-family: 'FluxDemo', sans-serif;
             font-size: 1.8rem; font-weight: 400; text-transform: uppercase;
             letter-spacing: 0.04em; margin-bottom: 12px; line-height: 1.2;
         }
@@ -389,7 +390,7 @@
             display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-top: 48px;
         }
         .feature-group h3 {
-            font-family: 'LemonSmash', sans-serif;
+            font-family: 'FluxDemo', sans-serif;
             font-size: 1.1rem; font-weight: 400; text-transform: uppercase; letter-spacing: 0.04em;
             margin-bottom: 16px; display: flex; align-items: center; gap: 10px;
         }
@@ -426,7 +427,7 @@
             color: var(--text-bright);
             box-shadow: 0 0 16px rgba(193,102,107,0.2);
         }
-        .tl-step h3 { font-family: 'LemonSmash', sans-serif; font-size: 1.2rem; font-weight: 400; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
+        .tl-step h3 { font-family: 'FluxDemo', sans-serif; font-size: 1.2rem; font-weight: 400; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
         .tl-step p { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; }
 
         /* ── SECURITY ── */
