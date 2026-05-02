@@ -118,20 +118,17 @@
             gap: 14px;
         }
         .skint-badge {
-            font-family: 'Inter', sans-serif;
-            font-size: 0.6rem;
-            font-weight: 600;
-            color: #ffffff;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            padding: 4px 10px;
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 8px;
             border: 1px solid var(--border);
             border-radius: 4px;
             transition: all 0.2s;
             text-decoration: none;
         }
         .skint-badge:hover {
-            color: var(--accent);
+            border-color: var(--accent);
+            opacity: 1 !important;
             border-color: var(--accent);
         }
         .nav-links { display: flex; gap: 28px; align-items: center; }
@@ -656,7 +653,7 @@
                 <div class="logo">
                     <span class="logo-jerry">Jerry</span> <span class="logo-sub">The Customer Service Bot</span>
                 </div>
-                <a href="https://skintlabs.ai" class="skint-badge" target="_blank" rel="noopener">by Skint Labs</a>
+                <a href="https://skintlabs.ai" class="skint-badge" target="_blank" rel="noopener"><img src="assets/headers/SkintLabs_PAC_space_transparent_colored.png" alt="Skint Labs" style="height:18px;width:auto;display:block;opacity:0.85;"></a>
             </div>
             <div class="nav-links">
                 <a href="#capabilities">Capabilities</a>
