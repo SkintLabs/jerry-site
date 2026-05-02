@@ -15,12 +15,16 @@
     <meta name="twitter:image" content="https://jerry.skintlabs.ai/og-image.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
+        @font-face { font-family: 'Remarcle';   src: url('assets/fonts/Remarcle.ttf') format('truetype'); }
+        @font-face { font-family: 'LemonSmash'; src: url('assets/fonts/LemonSmash-Regular.otf') format('opentype'); }
+        @font-face { font-family: 'DeathStar';  src: url('assets/fonts/Death Star.otf') format('opentype'); }
+
         :root {
             --mustard: #d4a040;
             --terracotta: #c1666b;
-            --warm-beige: #d4b896;
+            --warm-beige: #e2dbd0;
             --chocolate: #4a4032;
             --bg: #0c0b0a;
             --bg-subtle: #141210;
@@ -28,17 +32,31 @@
             --bg-card-hover: #252320;
             --border: #2e2a25;
             --border-hover: #3d3830;
-            --text: #d4b896;
-            --text-secondary: #c4a882;
+            --text: #ddd6ca;
+            --text-secondary: #c8bfb2;
             --text-muted: #8a7d6e;
-            --text-bright: #ede8e0;
+            --text-bright: #f0ebe4;
             --primary: #c1666b;
             --primary-hover: #d07478;
-            --primary-glow: rgba(193, 102, 107, 0.12);
+            --primary-glow: rgba(193, 102, 107, 0.18);
+            --primary-glow-strong: rgba(193, 102, 107, 0.35);
             --accent: #d4a040;
             --accent-hover: #e0b050;
             --gradient-warm: linear-gradient(135deg, #c1666b 0%, #d4a040 100%);
             --gradient-text: linear-gradient(135deg, #c1666b 0%, #d4a040 50%, #e9c46a 100%);
+        }
+
+        @keyframes heroPulse {
+            0%, 100% { opacity: 0.5; transform: translateX(-50%) scale(1); }
+            50%       { opacity: 0.75; transform: translateX(-50%) scale(1.08); }
+        }
+        @keyframes logoGlow {
+            0%, 100% { text-shadow: 0 0 14px rgba(193,102,107,0.5), 0 0 32px rgba(193,102,107,0.3); }
+            50%       { text-shadow: 0 0 22px rgba(193,102,107,0.8), 0 0 55px rgba(193,102,107,0.5), 0 0 80px rgba(212,160,64,0.2); }
+        }
+        @keyframes cardPulse {
+            0%, 100% { box-shadow: 0 12px 40px var(--primary-glow); }
+            50%       { box-shadow: 0 16px 56px var(--primary-glow-strong); }
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -47,13 +65,16 @@
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--bg);
             color: var(--text);
-            line-height: 1.6;
+            font-size: 1.05rem;
+            line-height: 1.7;
             -webkit-font-smoothing: antialiased;
             overflow-x: hidden;
             width: 100%;
         }
         h1, h2, h3 {
-            font-family: 'Noto Serif', Georgia, serif;
+            font-family: 'LemonSmash', 'Inter', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
             color: var(--text-bright);
         }
         a { color: var(--primary); text-decoration: none; transition: color 0.2s; }
@@ -71,9 +92,20 @@
             border-bottom: 1px solid var(--border);
         }
         nav .container { display: flex; justify-content: space-between; align-items: center; height: 64px; }
-        .logo { font-family: 'Noto Serif', Georgia, serif; font-size: 1.3rem; font-weight: 900; letter-spacing: -0.02em; }
-        .logo .logo-jerry { color: var(--accent); }
-        .logo .logo-sub { color: var(--primary); font-size: 0.65em; font-weight: 700; }
+        .logo { font-size: 1.4rem; font-weight: 400; letter-spacing: 0.02em; }
+        .logo .logo-jerry {
+            font-family: 'Remarcle', sans-serif;
+            font-size: 1.7rem;
+            letter-spacing: 0.06em;
+            background: var(--gradient-text);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: logoGlow 3s ease-in-out infinite;
+            /* fallback for no -webkit-text-fill-color support: */
+            display: inline-block;
+        }
+        .logo .logo-sub { color: var(--primary); font-size: 0.58em; font-weight: 600; letter-spacing: 0.04em; }
         .nav-brand {
             display: flex;
             align-items: center;
@@ -97,8 +129,9 @@
             border-color: var(--accent);
         }
         .nav-links { display: flex; gap: 28px; align-items: center; }
-        .nav-links a { color: var(--text-secondary); font-size: 0.88rem; font-weight: 500; }
-        .nav-links a:hover { color: var(--text); }
+        /* NAV FONT — swap font-family here once chosen */
+        .nav-links a { color: var(--text-secondary); font-size: 0.9rem; font-weight: 500; letter-spacing: 0.03em; }
+        .nav-links a:hover { color: var(--text-bright); }
         .nav-cta {
             background: var(--primary) !important; color: var(--text-bright) !important;
             -webkit-text-fill-color: var(--text-bright) !important;
@@ -117,8 +150,20 @@
         .hero::before {
             content: '';
             position: absolute; top: 0; right: 0; width: 50%; height: 700px;
-            background: radial-gradient(circle, rgba(193,102,107,0.08) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(193,102,107,0.12) 0%, transparent 70%);
             pointer-events: none;
+            animation: heroPulse 6s ease-in-out infinite;
+        }
+        /* cursor-follow glow */
+        .hero-cursor-glow {
+            position: absolute;
+            width: 600px; height: 600px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(193,102,107,0.09) 0%, transparent 70%);
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            transition: left 0.4s ease, top 0.4s ease;
+            z-index: 0;
         }
         .hero-grid {
             display: grid;
@@ -127,15 +172,18 @@
             align-items: center;
         }
         .hero-text h1 {
-            font-size: clamp(2.4rem, 5vw, 3.6rem);
-            font-weight: 900; line-height: 1.1; letter-spacing: -0.03em; margin-bottom: 20px;
+            font-family: 'LemonSmash', sans-serif;
+            font-size: clamp(2.6rem, 5.5vw, 4rem);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            font-weight: 400; line-height: 1.1; margin-bottom: 20px;
         }
         .hero-text .gradient-text {
             background: var(--gradient-text);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
         }
         .hero-text p {
-            font-size: 1.1rem; color: var(--text-secondary); line-height: 1.7; margin-bottom: 32px; max-width: 480px;
+            font-size: 1.15rem; color: var(--text-secondary); line-height: 1.75; margin-bottom: 32px; max-width: 480px;
         }
         .hero-buttons { display: flex; gap: 16px; flex-wrap: wrap; }
         .btn-primary {
@@ -238,8 +286,8 @@
         }
         .stat-block:last-child::after { display: none; }
         .stat-num {
-            font-family: 'Noto Serif', Georgia, serif;
-            font-size: 2.4rem; font-weight: 900; color: var(--accent);
+            font-family: 'Remarcle', sans-serif;
+            font-size: 2.6rem; color: var(--accent);
             line-height: 1; margin-bottom: 6px;
         }
         .stat-label {
@@ -254,8 +302,11 @@
             color: var(--primary); font-weight: 600; margin-bottom: 12px;
         }
         h2 {
-            font-size: clamp(2rem, 4vw, 3rem);
-            font-weight: 900; line-height: 1.15; letter-spacing: -0.02em; margin-bottom: 16px;
+            font-family: 'LemonSmash', sans-serif;
+            font-size: clamp(2.2rem, 4.5vw, 3.4rem);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            font-weight: 400; line-height: 1.1; margin-bottom: 16px;
         }
         .section-desc {
             font-size: 1.1rem; color: var(--text-secondary); max-width: 600px; line-height: 1.7;
@@ -275,7 +326,9 @@
             padding: 0 0 0 12px; border-left: 3px solid var(--accent); margin-bottom: 16px;
         }
         .cap-content h3 {
-            font-size: 1.6rem; font-weight: 900; margin-bottom: 12px; line-height: 1.2;
+            font-family: 'LemonSmash', sans-serif;
+            font-size: 1.8rem; font-weight: 400; text-transform: uppercase;
+            letter-spacing: 0.04em; margin-bottom: 12px; line-height: 1.2;
         }
         .cap-content p {
             font-size: 0.95rem; color: var(--text-secondary); line-height: 1.7; margin-bottom: 16px;
@@ -320,7 +373,9 @@
             display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-top: 48px;
         }
         .feature-group h3 {
-            font-size: 1rem; margin-bottom: 16px; display: flex; align-items: center; gap: 10px;
+            font-family: 'LemonSmash', sans-serif;
+            font-size: 1.1rem; font-weight: 400; text-transform: uppercase; letter-spacing: 0.04em;
+            margin-bottom: 16px; display: flex; align-items: center; gap: 10px;
         }
         .feature-group h3 .fg-icon {
             width: 32px; height: 32px; border-radius: 8px; display: flex;
@@ -351,10 +406,11 @@
             background: var(--bg-card); border: 2px solid var(--primary);
             display: flex; align-items: center; justify-content: center;
             margin: 0 auto 20px; position: relative; z-index: 1;
-            font-family: 'Noto Serif', Georgia, serif; font-size: 1.2rem; font-weight: 900;
+            font-family: 'Remarcle', sans-serif; font-size: 1.4rem;
             color: var(--accent);
+            box-shadow: 0 0 16px rgba(193,102,107,0.2);
         }
-        .tl-step h3 { font-size: 1.1rem; margin-bottom: 8px; }
+        .tl-step h3 { font-family: 'LemonSmash', sans-serif; font-size: 1.2rem; font-weight: 400; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
         .tl-step p { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; }
 
         /* ── SECURITY ── */
@@ -389,16 +445,21 @@
             background: var(--bg-card); border: 1px solid var(--border);
             border-radius: 16px; padding: 36px; position: relative; transition: transform 0.2s;
         }
-        .price-card:hover { transform: translateY(-3px); }
+        .price-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(193, 102, 107, 0.45);
+            box-shadow: 0 16px 56px var(--primary-glow-strong);
+        }
         .price-card.featured {
             border-color: var(--primary);
             box-shadow: 0 0 40px var(--primary-glow);
+            animation: cardPulse 4s ease-in-out infinite;
         }
-        .price-name { font-family: 'Noto Serif', Georgia, serif; font-size: 1.3rem; font-weight: 700; margin-bottom: 4px; }
+        .price-name { font-family: 'DeathStar', 'Inter', sans-serif; font-size: 1.5rem; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; color: var(--text-bright); }
         .price-desc { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px; }
         .price-amount {
-            font-family: 'Noto Serif', Georgia, serif;
-            font-size: 3.2rem; font-weight: 900; color: #ffffff;
+            font-family: 'Remarcle', sans-serif;
+            font-size: 3rem; color: var(--text-bright);
         }
         .price-amount span { font-size: 1rem; color: var(--text-muted); font-weight: 400; }
         .price-period { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 24px; }
@@ -449,9 +510,8 @@
         .early-bird-text span { color: var(--text-secondary); font-size: 0.9rem; }
         .early-bird-counter { text-align: center; min-width: 80px; }
         .early-bird-count {
-            font-family: 'Noto Serif', Georgia, serif;
-            font-size: 2.5rem;
-            font-weight: 900;
+            font-family: 'Remarcle', sans-serif;
+            font-size: 2.8rem;
             color: var(--accent);
             display: block;
             line-height: 1;
@@ -463,7 +523,7 @@
             text-decoration: line-through;
             display: none;
         }
-        .price-discounted { display: none; font-size: 3.2rem; font-weight: 900; color: #ffffff; }
+        .price-discounted { display: none; }
         .eb-badge {
             position: absolute;
             top: -12px;
@@ -555,7 +615,7 @@
                 <div class="logo">
                     <span class="logo-jerry">Jerry</span> <span class="logo-sub">The Customer Service Bot</span>
                 </div>
-                <a href="https://skintlabs.ai" target="_blank" rel="noopener"><img src="assets/headers/SkintLabs_PAC_space_transparent_colored.png" alt="Skint Labs" style="height: 28px; width: auto;"></a>
+                <a href="https://skintlabs.ai" class="skint-badge" target="_blank" rel="noopener">by Skint Labs</a>
             </div>
             <div class="nav-links">
                 <a href="#capabilities">Capabilities</a>
@@ -568,7 +628,8 @@
     </nav>
 
     <!-- HERO — split layout -->
-    <section class="hero">
+    <section class="hero" id="hero">
+        <div class="hero-cursor-glow" id="heroCursorGlow"></div>
         <div class="container">
             <div class="hero-grid fade-in">
                 <div class="hero-text">
@@ -1062,6 +1123,18 @@
     </div><!-- .page-wrap -->
 
     <script>
+        // Cursor-follow glow in hero
+        (function() {
+            var hero = document.getElementById('hero');
+            var glow = document.getElementById('heroCursorGlow');
+            if (!hero || !glow) return;
+            hero.addEventListener('mousemove', function(e) {
+                var r = hero.getBoundingClientRect();
+                glow.style.left = (e.clientX - r.left) + 'px';
+                glow.style.top  = (e.clientY - r.top)  + 'px';
+            });
+        })();
+
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) entry.target.classList.add('visible');
