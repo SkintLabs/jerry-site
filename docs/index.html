@@ -247,7 +247,7 @@
             padding: 12px; max-width: 85%;
         }
         .msg-product-name { font-size: 0.85rem; font-weight: 600; color: var(--text-bright); }
-        .msg-product-price { font-size: 0.9rem; color: var(--accent); font-weight: 700; font-family: 'Noto Serif', serif; }
+        .msg-product-price { font-size: 0.9rem; color: var(--accent); font-weight: 700; font-family: 'RoturaVintage', serif; }
         .msg-product-desc { font-size: 0.78rem; color: var(--text-muted); margin-top: 4px; }
         .chat-input-bar {
             padding: 12px 16px; border-top: 1px solid var(--border);
@@ -562,6 +562,22 @@
         .footer-links a:hover { color: var(--text); }
         .footer-copy { font-size: 0.8rem; color: var(--text-muted); }
         .footer-shield { font-size: 0.75rem; color: var(--terracotta); display: flex; align-items: center; gap: 6px; }
+        .skint-footer-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.68rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #7aab9e;
+            text-decoration: none;
+            margin-top: 10px;
+            opacity: 0.75;
+            transition: opacity 0.2s;
+        }
+        .skint-footer-badge:hover { opacity: 1; color: #7aab9e; }
 
         /* ── MOBILE ── */
         @media (max-width: 900px) {
@@ -836,19 +852,19 @@
                     <div class="cap-visual-label">Dashboard Preview</div>
                     <div class="cap-example" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%;">
                         <div style="background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center;">
-                            <div style="font-family: 'Noto Serif', serif; font-size: 1.6rem; font-weight: 900; color: var(--accent);">847</div>
+                            <div style="font-family: 'RoturaVintage', serif; font-size: 1.6rem; font-weight: 900; color: var(--accent);">847</div>
                             <div style="font-size: 0.72rem; color: var(--text-muted);">Conversations</div>
                         </div>
                         <div style="background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center;">
-                            <div style="font-family: 'Noto Serif', serif; font-size: 1.6rem; font-weight: 900; color: var(--accent);">94%</div>
+                            <div style="font-family: 'RoturaVintage', serif; font-size: 1.6rem; font-weight: 900; color: var(--accent);">94%</div>
                             <div style="font-size: 0.72rem; color: var(--text-muted);">Resolved</div>
                         </div>
                         <div style="background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center;">
-                            <div style="font-family: 'Noto Serif', serif; font-size: 1.6rem; font-weight: 900; color: var(--accent);">$12.4k</div>
+                            <div style="font-family: 'RoturaVintage', serif; font-size: 1.6rem; font-weight: 900; color: var(--accent);">$12.4k</div>
                             <div style="font-size: 0.72rem; color: var(--text-muted);">Revenue Attributed</div>
                         </div>
                         <div style="background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center;">
-                            <div style="font-family: 'Noto Serif', serif; font-size: 1.6rem; font-weight: 900; color: var(--accent);">1.8s</div>
+                            <div style="font-family: 'RoturaVintage', serif; font-size: 1.6rem; font-weight: 900; color: var(--accent);">1.8s</div>
                             <div style="font-size: 0.72rem; color: var(--text-muted);">Avg Response</div>
                         </div>
                     </div>
@@ -1105,7 +1121,8 @@
                     <div class="logo" style="margin-bottom: 8px;">
                         <span class="logo-jerry">Jerry</span> <span class="logo-sub">The Customer Service Bot</span>
                     </div>
-                    <div class="footer-copy">&copy; 2026 Jerry The Customer Service Bot &middot; A <a href="https://skintlabs.ai" style="color: var(--accent);">Skint Labs</a> Product</div>
+                    <div class="footer-copy">&copy; 2026 Jerry The Customer Service Bot</div>
+                    <a href="https://skintlabs.ai" target="_blank" rel="noopener" class="skint-footer-badge">&#9632; A Skint Labs Product</a>
                 </div>
                 <div class="footer-links">
                     <a href="#capabilities">Capabilities</a>

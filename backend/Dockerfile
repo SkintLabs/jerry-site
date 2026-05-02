@@ -28,6 +28,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy backend application code
 COPY backend/ .
 
+# Copy landing page assets
+COPY docs/ ../docs/
+
 # Port (Railway injects $PORT, default 8000)
 EXPOSE 8000
 

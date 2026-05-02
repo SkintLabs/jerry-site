@@ -87,7 +87,9 @@ export function Widget({ shop, server, primaryColor, position, ttsDefault = fals
   const recognitionRef = useRef<any>(null)
   const ttsEnabledRef = useRef(ttsDefault)
   const audioRef = useRef<HTMLAudioElement | null>(null)
+  const ttsAbortRef = useRef<AbortController | null>(null)
   const tokenRef = useRef<string>('')
+  const welcomeShownRef = useRef(false)
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
@@ -195,6 +197,10 @@ export function Widget({ shop, server, primaryColor, position, ttsDefault = fals
 
           if (data.type === 'message') {
             setIsTyping(false)
+            // Skip duplicate welcome: if we've already shown a welcome and
+            // the server sends another (after reconnect/redeploy), ignore it.
+            if (data.intent === 'greeting' && welcomeShownRef.current) return
+            if (data.intent === 'greeting') welcomeShownRef.current = true
             addMessage('assistant', data.text, data.products)
             speakText(data.text)
           }
@@ -268,16 +274,20 @@ export function Widget({ shop, server, primaryColor, position, ttsDefault = fals
 
   const speakText = useCallback(async (text: string) => {
     if (!ttsEnabledRef.current || !tokenRef.current) return
-    // Stop any current playback
+    // Cancel any in-flight TTS fetch and stop current playback
+    if (ttsAbortRef.current) { ttsAbortRef.current.abort(); ttsAbortRef.current = null }
     if (audioRef.current) { audioRef.current.pause(); audioRef.current = null }
     // Strip emojis so they aren't read aloud
     const clean = text.replace(EMOJI_RE, '').replace(/\s{2,}/g, ' ').trim()
     if (!clean) return
+    const abortCtrl = new AbortController()
+    ttsAbortRef.current = abortCtrl
     try {
       const res = await fetch(`${server}/tts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tokenRef.current}` },
         body: JSON.stringify({ text: clean }),
+        signal: abortCtrl.signal,
       })
       if (!res.ok) return
       const blob = await res.blob()

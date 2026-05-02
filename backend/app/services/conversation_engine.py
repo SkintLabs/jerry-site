@@ -301,9 +301,36 @@ class ResponseGenerator:
         self.model = os.getenv("GROQ_MODEL", self.DEFAULT_MODEL)
 
     async def generate(self, message, context, intent, entities, products, extra_context=None) -> str:
+        store_name = getattr(context.store, "name", None) or "this store"
+        product_block = ""
+        if products:
+            try:
+                lines = []
+                for p in products[:5]:
+                    title = getattr(p, "title", None) or (p.get("title") if isinstance(p, dict) else "Product")
+                    price = getattr(p, "price", None) or (p.get("price") if isinstance(p, dict) else "")
+                    lines.append(f"- {title} ({price})" if price else f"- {title}")
+                product_block = "\n\nMatching products:\n" + "\n".join(lines)
+            except Exception:
+                product_block = ""
+
+        system_prompt = f"""You are Jerry, the AI customer service assistant for {store_name}.
+
+PERSONALITY: Friendly, concise, helpful. Talk like a real shop assistant — warm but efficient. Short replies (1-3 sentences usually). No corporate jargon.
+
+CONVERSATION RULES:
+- ALWAYS use the conversation history. If the customer just gave you an order number after you asked for one, treat the number as their order number — do NOT ask again or change topic.
+- If the customer replies with a short answer (a number, "yes", "no", a colour, a size), interpret it in the context of YOUR previous question.
+- Never repeat the welcome greeting. Never restart the conversation.
+- If asked about refunds/returns: this store offers 30-day returns with a prepaid label by email. Refunds are issued to the original payment method ONCE the item is received back. We don't refund before receiving the item, but reassure the customer the label is fast and the refund is processed within 2 business days of receipt.
+- For order tracking: once the customer gives you an order number, confirm you'll look it up and (in this demo) tell them their order is on the way and will arrive in 2-3 business days.
+- For product questions: be helpful, suggest options, ask clarifying questions about size/colour/budget.
+
+CURRENT TURN INTENT: {intent}{product_block}"""
+
         messages = [
-            {"role": "system", "content": f"You are Jerry for {context.store.name}. Keep it short. Intent: {intent}"},
-            *[m.to_groq_format() for m in context.get_recent_history(5)],
+            {"role": "system", "content": system_prompt},
+            *[m.to_groq_format() for m in context.get_recent_history(12)],
             {"role": "user", "content": message}
         ]
         try:
@@ -311,7 +338,12 @@ class ResponseGenerator:
             with Timer() as t:
                 res = await loop.run_in_executor(
                     None,
-                    lambda: self.client.chat.completions.create(model=self.model, messages=messages),
+                    lambda: self.client.chat.completions.create(
+                        model=self.model,
+                        messages=messages,
+                        temperature=0.3,
+                        max_tokens=400,
+                    ),
                 )
             completion_text = res.choices[0].message.content
 
@@ -351,6 +383,47 @@ class _InMemoryContextManager:
     def set(self, session_id: str, context):
         self._contexts[session_id] = context
 
+
+class _RedisContextManager:
+    """
+    Redis-backed context store — persists conversation history across
+    Railway redeploys and server restarts so Jerry remembers the full
+    chat when a user reconnects mid-conversation.
+
+    Falls back to a fresh context on any Redis error (fail-open).
+    TTL: 24 hours (matching the JWT token lifetime).
+    """
+    TTL = 86_400  # 24 h
+
+    def __init__(self, redis_url: str):
+        import redis.asyncio as aioredis
+        self._redis = aioredis.from_url(redis_url, decode_responses=True)
+        self._prefix = "jerry:ctx:"
+
+    def _key(self, session_id: str) -> str:
+        return f"{self._prefix}{session_id}"
+
+    async def get_async(self, session_id: str):
+        try:
+            raw = await self._redis.get(self._key(session_id))
+            if raw:
+                return ConversationContext.from_json(raw)
+        except Exception as e:
+            logger.warning(f"Redis context get failed (using fresh context): {e}")
+        return None
+
+    async def set_async(self, session_id: str, context: "ConversationContext"):
+        try:
+            await self._redis.setex(self._key(session_id), self.TTL, context.to_json())
+        except Exception as e:
+            logger.warning(f"Redis context set failed: {e}")
+
+    async def delete_async(self, session_id: str):
+        try:
+            await self._redis.delete(self._key(session_id))
+        except Exception as e:
+            logger.warning(f"Redis context delete failed: {e}")
+
 # ============================================================================
 # CONVERSATION ENGINE — THE MAIN ORCHESTRATOR
 # ============================================================================
@@ -362,46 +435,49 @@ class ConversationEngine:
         self.response_generator = ResponseGenerator()
         self.escalation_handler = EscalationHandler()
         self._product_intelligence = _MockProductIntelligence()
-        self._context_manager = _InMemoryContextManager()
+        # Try Redis first; fall back to in-memory
+        redis_url = os.getenv("REDIS_URL", "")
+        if redis_url:
+            try:
+                self._redis_manager = _RedisContextManager(redis_url)
+                self._context_manager = _InMemoryContextManager()  # local cache
+                logger.info("ConversationEngine: Redis context store active")
+            except Exception as e:
+                logger.warning(f"Redis context store unavailable, using in-memory: {e}")
+                self._redis_manager = None
+                self._context_manager = _InMemoryContextManager()
+        else:
+            self._redis_manager = None
+            self._context_manager = _InMemoryContextManager()
 
     async def get_or_create_context(self, session_id: str, store_id: str) -> ConversationContext:
+        # Check local cache first (fast path)
         existing = self._context_manager.get(session_id)
         if existing:
             return existing
+        # Try Redis (survives redeploys)
+        if self._redis_manager:
+            existing = await self._redis_manager.get_async(session_id)
+            if existing:
+                self._context_manager.set(session_id, existing)
+                return existing
         context = ConversationContext(session_id=session_id, store_id=store_id)
         self._context_manager.set(session_id, context)
         return context
 
+    async def _save_context(self, context: ConversationContext) -> None:
+        """Persist context to Redis after each message."""
+        if self._redis_manager:
+            await self._redis_manager.set_async(context.session_id, context)
+
     async def end_session(self, session_id: str) -> None:
         self._context_manager._contexts.pop(session_id, None)
+        if self._redis_manager:
+            await self._redis_manager.delete_async(session_id)
 
     async def process_message(self, message: str, context: ConversationContext) -> EngineResponse:
-
-        # ── STEP 0: WONDERWALL AI FIREWALL (inbound scan) ──
-        if hasattr(self, "firewall_engine") and self.firewall_engine is not None:
-            try:
-                verdict = await self.firewall_engine.scan_inbound(message)
-                if not verdict.allowed:
-                    # Track the blocked attempt for analytics
-                    if hasattr(self, "analytics") and self.analytics is not None:
-                        await self.analytics.track_conversation(
-                            store_id=context.store_id,
-                            session_id=context.session_id,
-                            message=message,
-                            response_text=verdict.message,
-                            intent="firewall_block",
-                            entities={},
-                            products_shown=0,
-                            escalated=False,
-                        )
-                    return EngineResponse(
-                        text=verdict.message,
-                        intent="firewall_block",
-                        entities={},
-                        session_id=context.session_id,
-                    )
-            except Exception as e:
-                logger.error(f"Firewall inbound error (allowing): {e}")
+        # Firewall scanning is handled in main.py (single scan point, fully
+        # logged). process_message receives only pre-approved messages.
 
         # ── STEP 1: VALIDATION ──
         if len(message) > MAX_MESSAGE_LENGTH:
@@ -436,17 +512,12 @@ class ConversationEngine:
         context.add_message("user", message)
         context.add_message("assistant", response_text)
 
-        # ── STEP 4: OUTBOUND FIREWALL SCAN ──
-        if hasattr(self, "firewall_engine") and self.firewall_engine is not None:
-            try:
-                egress_verdict = await self.firewall_engine.scan_outbound(
-                    response_text, context.canary_token or ""
-                )
-                response_text = egress_verdict.message
-            except Exception as e:
-                logger.error(f"Firewall outbound error (allowing): {e}")
+        # Outbound firewall scan is handled in main.py (single scan point).
 
-        # ── STEP 5: SAVE FULL INTERACTION TO DB ──
+        # ── STEP 4: PERSIST CONTEXT TO REDIS (survives redeploys) ──
+        await self._save_context(context)
+
+        # ── STEP 6: SAVE FULL INTERACTION TO DB ──
         if hasattr(self, "analytics") and self.analytics is not None:
             await self.analytics.track_conversation(
                 store_id=context.store_id,
