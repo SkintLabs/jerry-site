@@ -18,33 +18,35 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         @font-face { font-family: 'Remarcle';   src: url('assets/fonts/Remarcle.ttf') format('truetype'); }
+        @font-face { font-family: 'Decofun';    src: url('assets/fonts/Decofun-Regular.ttf') format('truetype'); }
         @font-face { font-family: 'LemonSmash'; src: url('assets/fonts/LemonSmash-Regular.otf') format('opentype'); }
         @font-face { font-family: 'DeathStar';  src: url('assets/fonts/Death Star.otf') format('opentype'); }
         @font-face { font-family: 'RetroByte'; src: url('assets/fonts/RetroByte.ttf') format('truetype'); }
+        @font-face { font-family: 'FluxDemo';  src: url('assets/fonts/FluxDemo.ttf') format('truetype'); }
 
         :root {
-            --mustard: #d9a840;
-            --terracotta: #c86a65;
-            --warm-beige: #e8e0d2;
-            --chocolate: #4e4235;
+            --mustard: #d4a040;
+            --terracotta: #c1666b;
+            --warm-beige: #e2dbd0;
+            --chocolate: #4a4032;
             --bg: #0a0908;
             --bg-subtle: #110f0d;
-            --bg-card: #191714;
-            --bg-card-hover: #231f1b;
-            --border: #2e2822;
-            --border-hover: #3e3628;
-            --text: #cdc4b5;
-            --text-secondary: #ada396;
-            --text-muted: #7d7368;
-            --text-bright: #f0ebe1;
-            --primary: #c86a65;
-            --primary-hover: #d47870;
-            --primary-glow: rgba(200, 106, 101, 0.18);
-            --primary-glow-strong: rgba(200, 106, 101, 0.36);
-            --accent: #d9a840;
-            --accent-hover: #e6b850;
-            --gradient-warm: linear-gradient(135deg, #c86a65 0%, #d9a840 100%);
-            --gradient-text: linear-gradient(135deg, #c86a65 0%, #e09040 50%, #ecc860 100%);
+            --bg-card: #181614;
+            --bg-card-hover: #221f1c;
+            --border: #2a2520;
+            --border-hover: #3a3428;
+            --text: #c8bfb2;
+            --text-secondary: #a89e90;
+            --text-muted: #7a7268;
+            --text-bright: #ede8e0;
+            --primary: #c1666b;
+            --primary-hover: #d07478;
+            --primary-glow: rgba(193, 102, 107, 0.18);
+            --primary-glow-strong: rgba(193, 102, 107, 0.35);
+            --accent: #d4a040;
+            --accent-hover: #e0b050;
+            --gradient-warm: linear-gradient(135deg, #c1666b 0%, #d4a040 100%);
+            --gradient-text: linear-gradient(135deg, #c1666b 0%, #d4a040 50%, #e9c46a 100%);
         }
 
         @keyframes heroPulse {
@@ -58,6 +60,10 @@
         @keyframes cardPulse {
             0%, 100% { box-shadow: 0 12px 40px var(--primary-glow); }
             50%       { box-shadow: 0 16px 56px var(--primary-glow-strong); }
+        }
+        @keyframes navLogoPulse {
+            0%, 100% { text-shadow: 0 0 10px rgba(193,102,107,0.4), 0 0 24px rgba(193,102,107,0.15); }
+            50%       { text-shadow: 0 0 18px rgba(212,160,64,0.6), 0 0 40px rgba(212,160,64,0.25); }
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -73,10 +79,10 @@
             width: 100%;
         }
         h1, h2, h3 {
-            font-family: 'LemonSmash', 'Inter', sans-serif;
+            font-family: 'FluxDemo', 'Inter', sans-serif;
             text-transform: uppercase;
-            letter-spacing: 0.04em;
-            color: var(--text-bright);
+            letter-spacing: 0.06em;
+            color: #ede8e0;
         }
         a { color: var(--primary); text-decoration: none; transition: color 0.2s; }
         a:hover { color: var(--primary-hover); }
@@ -103,15 +109,7 @@
             animation: logoGlow 3.5s ease-in-out infinite;
             display: inline-block;
         }
-        .logo .logo-sub {
-            font-family: 'RetroByte', sans-serif;
-            color: #b08a72;
-            font-size: 0.85rem;
-            font-weight: 400;
-            letter-spacing: 0.09em;
-            padding-left: 8px;
-            align-self: center;
-        }
+        .logo .logo-sub { font-family: 'Decofun', sans-serif; color: #b08a72; font-size: 0.85rem; font-weight: 400; letter-spacing: 0.06em; padding-left: 8px; align-self: center; }
         .nav-brand {
             display: flex;
             align-items: center;
@@ -170,22 +168,16 @@
             align-items: center;
         }
         .hero-text h1 {
-            font-family: 'LemonSmash', sans-serif;
-            font-size: clamp(2.7rem, 5.5vw, 4.1rem);
+            font-family: 'FluxDemo', sans-serif;
+            font-size: clamp(2.6rem, 5.5vw, 4rem);
             text-transform: uppercase;
             letter-spacing: 0.04em;
-            font-weight: 400; line-height: 1.08; margin-bottom: 22px;
+            font-weight: 400; line-height: 1.1; margin-bottom: 20px;
+            color: var(--warm-beige);
         }
-        .hero-text .hero-jerry {
+        .hero-text .jerry-name {
             font-family: 'Remarcle', sans-serif;
-            font-size: 1.18em;
-            color: #e8a84e;
-            -webkit-text-fill-color: #e8a84e;
-            letter-spacing: 0.06em;
-        }
-        .hero-text .hero-sub {
-            background: var(--gradient-text);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            color: var(--accent);
         }
         .hero-text .gradient-text {
             background: var(--gradient-text);
@@ -295,7 +287,8 @@
         }
         .stat-block:last-child::after { display: none; }
         .stat-num {
-            font-family: 'Remarcle', sans-serif;
+            font-family: 'Inter', sans-serif;
+            font-weight: 800;
             font-size: 2.6rem; color: var(--accent);
             line-height: 1; margin-bottom: 6px;
         }
@@ -307,18 +300,18 @@
         /* ── SECTIONS ── */
         section { padding: 100px 0; }
         .section-label {
-            font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.18em;
-            color: var(--primary); font-weight: 600; margin-bottom: 14px;
+            font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.15em;
+            color: var(--primary); font-weight: 600; margin-bottom: 12px;
         }
         h2 {
-            font-family: 'LemonSmash', sans-serif;
-            font-size: clamp(2.4rem, 4.8vw, 3.6rem);
+            font-family: 'FluxDemo', sans-serif;
+            font-size: clamp(2.2rem, 4.5vw, 3.4rem);
             text-transform: uppercase;
             letter-spacing: 0.04em;
-            font-weight: 400; line-height: 1.08; margin-bottom: 18px;
+            font-weight: 400; line-height: 1.1; margin-bottom: 16px;
         }
         .section-desc {
-            font-size: 1.05rem; color: var(--text-secondary); max-width: 600px; line-height: 1.78;
+            font-size: 1.1rem; color: var(--text-secondary); max-width: 600px; line-height: 1.7;
         }
 
         /* ── CAPABILITIES — alternating rows (distinct from card grid) ── */
@@ -335,7 +328,7 @@
             padding: 0 0 0 12px; border-left: 3px solid var(--accent); margin-bottom: 16px;
         }
         .cap-content h3 {
-            font-family: 'LemonSmash', sans-serif;
+            font-family: 'FluxDemo', sans-serif;
             font-size: 1.8rem; font-weight: 400; text-transform: uppercase;
             letter-spacing: 0.04em; margin-bottom: 12px; line-height: 1.2;
         }
@@ -353,11 +346,18 @@
         }
         .cap-visual {
             background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
-            padding: 32px; position: relative; overflow: hidden;
+            padding: 32px; position: relative; overflow: hidden; transition: all 0.3s;
         }
         .cap-visual::before {
             content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-            background: var(--gradient-warm);
+            background: var(--gradient-warm); opacity: 1; transition: opacity 0.3s;
+        }
+        .cap-visual:hover {
+            border-color: var(--primary); transform: translateY(-3px);
+            box-shadow: 0 8px 32px var(--primary-glow);
+        }
+        .cap-visual:hover::before {
+            opacity: 1;
         }
         .cap-visual-label {
             font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em;
@@ -382,7 +382,7 @@
             display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-top: 48px;
         }
         .feature-group h3 {
-            font-family: 'LemonSmash', sans-serif;
+            font-family: 'FluxDemo', sans-serif;
             font-size: 1.1rem; font-weight: 400; text-transform: uppercase; letter-spacing: 0.04em;
             margin-bottom: 16px; display: flex; align-items: center; gap: 10px;
         }
@@ -415,11 +415,11 @@
             background: var(--bg-card); border: 2px solid var(--primary);
             display: flex; align-items: center; justify-content: center;
             margin: 0 auto 20px; position: relative; z-index: 1;
-            font-family: 'Remarcle', sans-serif; font-size: 1.4rem;
-            color: var(--accent);
+            font-family: 'Inter', sans-serif; font-size: 1.4rem; font-weight: 800;
+            color: var(--text-bright);
             box-shadow: 0 0 16px rgba(193,102,107,0.2);
         }
-        .tl-step h3 { font-family: 'LemonSmash', sans-serif; font-size: 1.2rem; font-weight: 400; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
+        .tl-step h3 { font-family: 'FluxDemo', sans-serif; font-size: 1.2rem; font-weight: 400; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
         .tl-step p { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; }
 
         /* ── SECURITY ── */
@@ -452,12 +452,19 @@
         }
         .price-card {
             background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: 16px; padding: 36px; position: relative; transition: transform 0.2s;
+            border-radius: 16px; padding: 36px; position: relative; transition: all 0.3s; overflow: hidden;
+        }
+        .price-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            background: var(--gradient-warm); opacity: 0; transition: opacity 0.3s;
         }
         .price-card:hover {
-            transform: translateY(-4px);
-            border-color: rgba(193, 102, 107, 0.45);
-            box-shadow: 0 16px 56px var(--primary-glow-strong);
+            transform: translateY(-3px);
+            border-color: var(--primary);
+            box-shadow: 0 8px 32px var(--primary-glow);
+        }
+        .price-card:hover::before {
+            opacity: 1;
         }
         .price-card.featured {
             border-color: var(--primary);
@@ -467,7 +474,7 @@
         .price-name { font-family: 'DeathStar', 'Inter', sans-serif; font-size: 1.5rem; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; color: var(--text-bright); }
         .price-desc { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px; }
         .price-amount {
-            font-family: 'Remarcle', sans-serif;
+            font-family: 'Inter', sans-serif; font-weight: 800;
             font-size: 3rem; color: var(--text-bright);
         }
         .price-amount span { font-size: 1rem; color: var(--text-muted); font-weight: 400; }
@@ -519,9 +526,9 @@
         .early-bird-text span { color: var(--text-secondary); font-size: 0.9rem; }
         .early-bird-counter { text-align: center; min-width: 80px; }
         .early-bird-count {
-            font-family: 'Remarcle', sans-serif;
+            font-family: 'Inter', sans-serif; font-weight: 800;
             font-size: 2.8rem;
-            color: var(--accent);
+            color: var(--text-bright);
             display: block;
             line-height: 1;
         }
@@ -580,7 +587,7 @@
             font-weight: 600;
             letter-spacing: 0.1em;
             text-transform: uppercase;
-            color: #7aab9e;
+            color: #ffffff;
             text-decoration: none;
             margin-top: 10px;
             opacity: 0.75;
@@ -613,7 +620,7 @@
             .nav-links a:not(.nav-cta) { display: none; }
             .nav-cta { padding: 6px 16px; font-size: 0.78rem; }
             .logo .logo-jerry { font-size: 1.6rem; }
-            .logo .logo-sub { font-size: 0.58rem; }
+            .logo .logo-sub { font-size: 0.65rem; }
             .stats-inner { grid-template-columns: repeat(2, 1fr); }
             .stat-block { padding: 20px 16px; }
             .stat-block::after { display: none; }
@@ -659,11 +666,11 @@
             <div class="hero-grid fade-in">
                 <div class="hero-text">
                     <h1>
-                        Meet <span class="hero-jerry">Jerry</span><br><span class="hero-sub">The Customer Service Bot</span>
+                        Meet <span class="jerry-name">Jerry</span> The Customer Service Bot
                     </h1>
                     <p>
                         The AI assistant that knows every product in your Shopify store, tracks every order,
-                        handles returns, speaks 50+ languages, and never takes a day off.
+                        handles returns, speaks 8 languages, and never takes a day off.
                     </p>
                     <div class="hero-buttons">
                         <a class="btn-primary" href="https://sunsetbot-production.up.railway.app/static/demo.html" target="_blank" rel="noopener">Try Free Demo &rarr;</a>
@@ -710,7 +717,7 @@
                     <div class="stat-label">Always On</div>
                 </div>
                 <div class="stat-block">
-                    <div class="stat-num">50+</div>
+                    <div class="stat-num">8</div>
                     <div class="stat-label">Languages</div>
                 </div>
                 <div class="stat-block">
@@ -816,14 +823,14 @@
             <div class="capability reverse fade-in">
                 <div class="cap-content">
                     <div class="cap-tag">Accessibility</div>
-                    <h3>Voice Chat &amp; 50+ Languages</h3>
+                    <h3>Voice Chat &amp; 8 Languages</h3>
                     <p>
                         Jerry The Customer Service Bot speaks to every customer in their language. Built-in voice chat uses the browser's Web Speech API — no external services, no extra cost, no latency.
                     </p>
                     <ul class="cap-bullets">
                         <li><span class="dot"></span>Speech-to-text: customers can talk instead of type</li>
                         <li><span class="dot"></span>Text-to-speech: Jerry reads responses aloud</li>
-                        <li><span class="dot"></span>50+ languages supported out of the box</li>
+                        <li><span class="dot"></span>8 languages supported out of the box</li>
                         <li><span class="dot"></span>Automatic language detection — no settings to change</li>
                         <li><span class="dot"></span>Zero external API calls — runs entirely in the browser</li>
                     </ul>
@@ -952,7 +959,7 @@
                         <li><span class="check">&#10003;</span> Data leak prevention (PII, API keys)</li>
                         <li><span class="check">&#10003;</span> Topic enforcement (stays on-topic)</li>
                         <li><span class="check">&#10003;</span> Voice chat (speech-to-text &amp; text-to-speech)</li>
-                        <li><span class="check">&#10003;</span> 50+ language support</li>
+                        <li><span class="check">&#10003;</span> 8 language support</li>
                         <li><span class="check">&#10003;</span> Revenue attribution dashboard</li>
                         <li><span class="check">&#10003;</span> Smart escalation to human agents</li>
                         <li><span class="check">&#10003;</span> Embeddable widget (shadow DOM isolated)</li>
@@ -1071,7 +1078,7 @@
                         <li><span class="check">&#10003;</span> 500 conversations/month</li>
                         <li><span class="check">&#10003;</span> Full product catalog sync</li>
                         <li><span class="check">&#10003;</span> Order tracking &amp; returns</li>
-                        <li><span class="check">&#10003;</span> Voice chat &amp; 50+ languages</li>
+                        <li><span class="check">&#10003;</span> Voice chat &amp; 8 languages</li>
                         <li><span class="check">&#10003;</span> AI security (WonderwallAi)</li>
                     </ul>
                     <a class="btn-price btn-price-secondary" href="https://sunsetbot-production.up.railway.app/billing/checkout?plan=starter">Get Started</a>
