@@ -166,7 +166,7 @@ body::before {
   <div class="wordmark">Jerry</div>
   <div class="tagline">The AI that knows your store,<br>tracks every order, handles returns.</div>
   <div class="pills">
-    <div class="pill">Shopify Native</div>
+    <div class="pill">Returns &amp; Refunds</div>
     <div class="pill">8 Languages</div>
     <div class="pill">Voice Chat</div>
     <div class="pill">Order Tracking</div>
