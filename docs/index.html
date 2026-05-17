@@ -1071,8 +1071,8 @@
                     <span class="eb-badge">50% OFF</span>
                     <div class="price-name">Starter</div>
                     <div class="price-desc">For growing Shopify stores</div>
-                    <div class="price-original">$49/mo</div>
-                    <div class="price-amount"><span class="price-full">$49</span><span class="price-discounted">$24.50</span> <span>USD/mo</span></div>
+                    <div class="price-amount">$49 <span>USD/mo</span></div>
+                    <div class="price-eb-hint" style="font-size: 0.85rem; color: var(--accent); margin-top: -4px; margin-bottom: 8px; font-weight: 600;">50% off forever with <span style="font-family: 'JetBrains Mono', monospace; background: rgba(212,160,64,0.12); padding: 1px 6px; border-radius: 3px;">EARLYBIRD50</span> → $24.50/mo</div>
                     <div class="price-period">+ $0.25/resolution</div>
                     <ul class="price-features">
                         <li><span class="check">&#10003;</span> 500 conversations/month</li>
@@ -1087,8 +1087,8 @@
                     <span class="eb-badge">50% OFF</span>
                     <div class="price-name">Growth</div>
                     <div class="price-desc">For scaling stores</div>
-                    <div class="price-original">$149/mo</div>
-                    <div class="price-amount"><span class="price-full">$149</span><span class="price-discounted">$74.50</span> <span>USD/mo</span></div>
+                    <div class="price-amount">$149 <span>USD/mo</span></div>
+                    <div class="price-eb-hint" style="font-size: 0.85rem; color: var(--accent); margin-top: -4px; margin-bottom: 8px; font-weight: 600;">50% off forever with <span style="font-family: 'JetBrains Mono', monospace; background: rgba(212,160,64,0.12); padding: 1px 6px; border-radius: 3px;">EARLYBIRD50</span> → $74.50/mo</div>
                     <div class="price-period">+ $0.25/resolution</div>
                     <ul class="price-features">
                         <li><span class="check">&#10003;</span> Unlimited conversations</li>
@@ -1103,8 +1103,8 @@
                     <span class="eb-badge">50% OFF</span>
                     <div class="price-name">Scale</div>
                     <div class="price-desc">For high-volume stores</div>
-                    <div class="price-original">$499/mo</div>
-                    <div class="price-amount"><span class="price-full">$499</span><span class="price-discounted">$249.50</span> <span>USD/mo</span></div>
+                    <div class="price-amount">$499 <span>USD/mo</span></div>
+                    <div class="price-eb-hint" style="font-size: 0.85rem; color: var(--accent); margin-top: -4px; margin-bottom: 8px; font-weight: 600;">50% off forever with <span style="font-family: 'JetBrains Mono', monospace; background: rgba(212,160,64,0.12); padding: 1px 6px; border-radius: 3px;">EARLYBIRD50</span> → $249.50/mo</div>
                     <div class="price-period">+ $0.25/resolution</div>
                     <ul class="price-features">
                         <li><span class="check">&#10003;</span> Everything in Growth</li>
@@ -1175,17 +1175,12 @@
         }, { threshold: 0.1 });
         document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 
-        // Early bird pricing — show discounted prices on all paid cards
+        // Early bird pricing — keep the 50% OFF badge visible on every paid card.
+        // Discounted prices are now shown inline as a hint line under the headline price.
         (function() {
             document.querySelectorAll('.price-card[data-plan]').forEach(function(card) {
                 var badge = card.querySelector('.eb-badge');
-                var original = card.querySelector('.price-original');
-                var full = card.querySelector('.price-full');
-                var discounted = card.querySelector('.price-discounted');
                 if (badge) badge.style.display = 'block';
-                if (original) original.style.display = 'block';
-                if (full) full.style.display = 'none';
-                if (discounted) discounted.style.display = 'inline';
             });
         })();
     </script>
