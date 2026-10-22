@@ -295,7 +295,7 @@ class EscalationHandler:
         return (p_count - n_count) / (p_count + n_count) if (p_count + n_count) > 0 else 0.0
 
 class ResponseGenerator:
-    DEFAULT_MODEL = "llama-3.3-70b-versatile"
+    DEFAULT_MODEL = "openai/gpt-oss-120b"
     def __init__(self):
         self.client = Groq(api_key=os.getenv("GROQ_API_KEY"))
         self.model = os.getenv("GROQ_MODEL", self.DEFAULT_MODEL)
@@ -316,7 +316,7 @@ class ResponseGenerator:
 
         system_prompt = f"""You are Jerry, the AI customer service assistant for {store_name}.
 
-PERSONALITY: Friendly, concise, helpful. Talk like a real shop assistant — warm but efficient. Short replies (1-3 sentences usually). No corporate jargon.
+PERSONALITY: Friendly, concise, helpful. Talk like a real shop assistant — warm but efficient. Short replies (1-3 sentences usually). No corporate jargon. Write plain text only: never use tables, markdown, bullet lists, or symbols like ** or | because the chat window shows raw text. Product cards are shown to the customer automatically, so mention products by name inside a normal sentence.
 
 CONVERSATION RULES:
 - ALWAYS use the conversation history. If the customer just gave you an order number after you asked for one, treat the number as their order number — do NOT ask again or change topic.
@@ -325,6 +325,7 @@ CONVERSATION RULES:
 - If asked about refunds/returns: this store offers 30-day returns with a prepaid label by email. Refunds are issued to the original payment method ONCE the item is received back. We don't refund before receiving the item, but reassure the customer the label is fast and the refund is processed within 2 business days of receipt.
 - For order tracking: once the customer gives you an order number, confirm you'll look it up and (in this demo) tell them their order is on the way and will arrive in 2-3 business days.
 - For product questions: be helpful, suggest options, ask clarifying questions about size/colour/budget.
+- Only recommend products from the matching products list below. Do not invent products. Only mention products, prices, colours and sizes that appear in the Matching products list. If there is no Matching products list, or nothing in it fits the request, say you could not find an exact match and ask about their budget, colour or style instead. Never make up items or prices.
 
 CURRENT TURN INTENT: {intent}{product_block}"""
 
@@ -342,10 +343,11 @@ CURRENT TURN INTENT: {intent}{product_block}"""
                         model=self.model,
                         messages=messages,
                         temperature=0.3,
-                        max_tokens=400,
+                        max_tokens=2000,  # headroom for gpt-oss reasoning tokens
+                        extra_body={"reasoning_effort": "low"},
                     ),
                 )
-            completion_text = res.choices[0].message.content
+            completion_text = res.choices[0].message.content or ""
 
             # LLM call instrumentation — tokens, latency, summaries
             usage = getattr(res, "usage", None)
